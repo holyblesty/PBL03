@@ -4,7 +4,7 @@ import UserDashboard from './UserDashboard'; // Sesuaikan path jika ada di dalam
 function App() {
   return (
     <div>
-      <PenggunaDashboard />
+      <UserDashboard />
     </div>
   );
 }
