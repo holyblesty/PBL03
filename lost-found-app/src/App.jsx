@@ -1,5 +1,5 @@
 import React from 'react';
-import PenggunaDashboard from './PenggunaDashboard'; // Sesuaikan path jika ada di dalam folder tertentu
+import UserDashboard from './UserDashboard'; // Sesuaikan path jika ada di dalam folder tertentu
 
 function App() {
   return (
