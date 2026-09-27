@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 
-export default function UserNavbar() {
+export default function UserNavbar({ searchTerm, onSearchChange }) {
     const [showNotifications, setShowNotifications] = useState(false);
+    const [hasNewNotif, setHasNewNotif] = useState(true);
 
-    // Data notifikasi yang mencakup semua skenario (jadwal diterima, klaim di-ACC, laporan di-ACC)
-    const notifications = [
+    const [notifications, setNotifications] = useState([
         {
             id: 1,
             text: 'Jadwal request pengambilan barang "Tumbler Corkcicle" telah diterima dan dikonfirmasi oleh Pamdal.',
@@ -23,22 +23,40 @@ export default function UserNavbar() {
             time: '1 hari lalu',
             unread: false
         },
-    ];
+    ]);
+
+    const handleOpenNotifications = () => {
+        setShowNotifications(!showNotifications);
+        setHasNewNotif(false);
+        setNotifications(notifications.map(n => ({ ...n, unread: false })));
+    };
 
     return (
         <header style={{ height: '70px', backgroundColor: '#FFFFFF', borderBottom: '1px solid #E5E7EB', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 32px', boxSizing: 'border-box', position: 'relative' }}>
-            {/* Judul Universal & Kolom Filter */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1F2937', margin: 0 }}>Dashboard Pengguna Kampus</h2>
 
-                <div style={{ position: 'relative' }}>
-                    <input
-                        type="text"
-                        placeholder="Cari barang hilang/temuan..."
-                        style={{ padding: '6px 12px 6px 32px', borderRadius: '6px', border: '1px solid #D1D5DB', fontSize: '13px', outline: 'none', width: '220px', backgroundColor: '#F9FAFB' }}
-                    />
-                    <span style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#9CA3AF', fontSize: '13px' }}>🔍</span>
-                </div>
+            {/* 1. Kolom Search Filter di Navbar */}
+            <div style={{ position: 'relative', width: '280px' }}>
+                <input
+                    type="text"
+                    placeholder="Cari riwayat laporan..."
+                    value={searchTerm}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    style={{
+                        width: '100%',
+                        padding: '8px 12px 8px 36px',
+                        fontSize: '13px',
+                        borderRadius: '8px',
+                        border: '1px solid #D1D5DB',
+                        outline: 'none',
+                        boxSizing: 'border-box',
+                        backgroundColor: '#F9FAFB',
+                        transition: 'all 0.15s ease'
+                    }}
+                />
+                <svg style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
             </div>
 
             {/* Bagian Kanan: Notifikasi & Profil */}
@@ -47,25 +65,27 @@ export default function UserNavbar() {
                 {/* Tombol Lonceng Notifikasi */}
                 <div style={{ position: 'relative' }}>
                     <button
-                        onClick={() => setShowNotifications(!showNotifications)}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', position: 'relative', padding: '6px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        onClick={handleOpenNotifications}
+                        style={{ background: 'none', border: '1px solid #E5E7EB', cursor: 'pointer', fontSize: '16px', position: 'relative', padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F9FAFB', transition: 'background 0.2s' }}
+                        title="Notifikasi"
                     >
                         🔔
-                        {/* Indikator Titik Merah */}
-                        <span style={{ position: 'absolute', top: '4px', right: '4px', width: '8px', height: '8px', backgroundColor: '#EF4444', borderRadius: '50%' }}></span>
+                        {hasNewNotif && (
+                            <span style={{ position: 'absolute', top: '2px', right: '2px', width: '8px', height: '8px', backgroundColor: '#EF4444', borderRadius: '50%' }}></span>
+                        )}
                     </button>
 
                     {/* Dropdown Box Notifikasi */}
                     {showNotifications && (
-                        <div style={{ position: 'absolute', right: '0', top: '45px', width: '340px', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', zIndex: 100, padding: '12px' }}>
+                        <div style={{ position: 'absolute', right: '0', top: '50px', width: '340px', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '8px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)', zIndex: 100, padding: '12px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #F3F4F6', paddingBottom: '8px' }}>
                                 <span style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>Notifikasi</span>
-                                <span style={{ fontSize: '11px', color: '#2563EB', cursor: 'pointer', fontWeight: '600' }}>Tandai sudah dibaca</span>
+                                <span style={{ fontSize: '11px', color: '#6B7280' }}>Semua telah dibaca</span>
                             </div>
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
                                 {notifications.map((notif) => (
-                                    <div key={notif.id} style={{ padding: '10px', borderRadius: '6px', backgroundColor: notif.unread ? '#EFF6FF' : '#F9FAFB', border: '1px solid #E5E7EB' }}>
-                                        <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#1F2937', fontWeight: notif.unread ? '600' : '400', lineHeight: '1.4' }}>{notif.text}</p>
+                                    <div key={notif.id} style={{ padding: '10px', borderRadius: '6px', backgroundColor: '#F9FAFB', border: '1px solid #E5E7EB' }}>
+                                        <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#1F2937', fontWeight: '400', lineHeight: '1.4' }}>{notif.text}</p>
                                         <span style={{ fontSize: '10px', color: '#6B7280' }}>{notif.time}</span>
                                     </div>
                                 ))}

@@ -47,7 +47,7 @@ export default function UserSidebar() {
 
     // Menggunakan palet High Contrast yang sama persis dengan Admin Sidebar
     const colors = {
-        bgSidebar: '#111827',     // Abu-abu arang sangat gelap (hampir hitam)
+        bgSidebar: '#111827',    // Abu-abu arang sangat gelap (hampir hitam)
         bgActive: '#1F2937',      // Latar belakang menu aktif
         textActive: '#FBBF24',    // Kuning Emas Terang (Sangat menyala)
         textNormal: '#E2E8F0',    // Putih keabu-abuan terang untuk menu biasa
@@ -87,7 +87,7 @@ export default function UserSidebar() {
                     margin: 0,
                     paddingLeft: '34px'
                 }}>
-                    PORTAL MAHASISWA
+                    PORTAL PENGGUNA KAMPUS
                 </p>
             </div>
 
