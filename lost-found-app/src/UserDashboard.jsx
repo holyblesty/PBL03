@@ -6,15 +6,25 @@ import './App.css';
 export default function UserDashboard() {
     const [searchQuery, setSearchQuery] = useState('');
 
+    // State untuk Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
     const myReports = [
         { id: 1, namaBarang: 'Dompet Hitam Kulit', jenis: 'Kehilangan', tanggal: '26 Sep 2026', status: 'Dipublikasikan' },
         { id: 2, namaBarang: 'Tumbler Corkcicle', jenis: 'Penemuan', tanggal: '24 Sep 2026', status: 'Selesai / Dikembalikan' },
     ];
 
+    // 1. Logika Filter Pencarian
     const filteredReports = myReports.filter((item) =>
         item.namaBarang.toLowerCase().includes(searchQuery.toLowerCase()) ||
         item.jenis.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // 2. Logika Pemotongan Data untuk Pagination
+    const totalPages = Math.ceil(filteredReports.length / itemsPerPage) || 1;
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const currentReports = filteredReports.slice(startIndex, startIndex + itemsPerPage);
 
     return (
         <div className="dashboard-container">
@@ -25,13 +35,13 @@ export default function UserDashboard() {
 
                 <div className="dashboard-content">
 
-                    {/* Header: Bersih tanpa inline style kaku */}
+                    {/* Header */}
                     <div className="admin-header">
                         <h1>Halo, Selamat Datang!</h1>
                         <p>Kelola laporan barang hilang atau temuan Anda dengan cepat di sini.</p>
                     </div>
 
-                    {/* Statistik Kartu: Memakai utility class warna teks dari App.css */}
+                    {/* Statistik Kartu */}
                     <div className="card-stats-container">
                         <div className="dashboard-card">
                             <h3>Laporan Kehilangan Aktif</h3>
@@ -63,7 +73,10 @@ export default function UserDashboard() {
                                     type="text"
                                     placeholder="Cari nama barang..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => {
+                                        setSearchQuery(e.target.value);
+                                        setCurrentPage(1); // Reset ke halaman 1 saat mengetik pencarian
+                                    }}
                                 />
                             </div>
                         </div>
@@ -79,8 +92,8 @@ export default function UserDashboard() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredReports.length > 0 ? (
-                                        filteredReports.map((item) => {
+                                    {currentReports.length > 0 ? (
+                                        currentReports.map((item) => {
                                             const isCompleted = item.status.includes('Selesai');
                                             return (
                                                 <tr key={item.id}>
@@ -105,10 +118,55 @@ export default function UserDashboard() {
                                 </tbody>
                             </table>
                         </div>
+
+                        {/* Komponen Pagination di Bawah Tabel */}
+                        <div className="pagination-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderTop: '1px solid #E5E7EB' }}>
+                            <span style={{ fontSize: '13px', color: '#6B7280' }}>
+                                Menampilkan {filteredReports.length > 0 ? startIndex + 1 : 0} - {Math.min(startIndex + itemsPerPage, filteredReports.length)} dari {filteredReports.length} data
+                            </span>
+
+                            <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: '13px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #D1D5DB',
+                                        backgroundColor: currentPage === 1 ? '#F3F4F6' : '#FFFFFF',
+                                        color: currentPage === 1 ? '#9CA3AF' : '#374151',
+                                        cursor: currentPage === 1 ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    Sebelumnya
+                                </button>
+
+                                <span style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+                                    Hal. {currentPage} dari {totalPages}
+                                </span>
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages || totalPages === 0}
+                                    style={{
+                                        padding: '6px 12px',
+                                        fontSize: '13px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #D1D5DB',
+                                        backgroundColor: (currentPage === totalPages || totalPages === 0) ? '#F3F4F6' : '#FFFFFF',
+                                        color: (currentPage === totalPages || totalPages === 0) ? '#9CA3AF' : '#374151',
+                                        cursor: (currentPage === totalPages || totalPages === 0) ? 'not-allowed' : 'pointer'
+                                    }}
+                                >
+                                    Berikutnya
+                                </button>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
             </main>
         </div>
     );
 }
-
