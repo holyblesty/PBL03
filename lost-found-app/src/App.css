@@ -209,7 +209,7 @@ html {
 }
 
 /* ==========================================================================
-   5. MODERN TABLE STYLING
+   5. MODERN TABLE STYLING (VERSI FIX - KONTRAS TINGGI PREMIUM)
    ========================================================================== */
 .table-card {
   background: #FFFFFF;
@@ -217,6 +217,7 @@ html {
   border: 1px solid var(--border-color);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  margin-top: 16px;
 }
 
 .table-header-wrapper {
@@ -224,14 +225,19 @@ html {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #F1F5F9;
+  border-bottom: 2px solid #E2E8F0;
+  /* Dipertebal pembatas headernya */
   flex-wrap: wrap;
   gap: 12px;
+  background-color: #FFFFFF;
 }
 
+/* Memperbaiki posisi ikon search bar agar tepat di kiri */
 .search-input-wrapper {
   position: relative;
   width: 280px;
+  display: flex;
+  align-items: center;
 }
 
 .search-input-wrapper input {
@@ -240,7 +246,7 @@ html {
   font-size: 14px;
   font-weight: 500;
   border-radius: 8px;
-  border: 1px solid #D1D5DB;
+  border: 1px solid #CBD5E1;
   outline: none;
   box-sizing: border-box;
   background-color: #F8FAFC;
@@ -253,11 +259,11 @@ html {
   background-color: #FFFFFF;
 }
 
+/* Mengunci ikon agar pas di dalam boks input */
 .search-input-wrapper svg {
   position: absolute;
   left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+  pointer-events: none;
 }
 
 .modern-table {
@@ -266,31 +272,42 @@ html {
   text-align: left;
 }
 
+/* UBAH TOTAL: Header dibuat gelap & teks kuning menyala agar berwibawa */
 .modern-table th {
-  background-color: #F8FAFC;
+  background-color: #111827;
+  /* Menggunakan warna dasar hitam arang sidebar admin */
   padding: 16px 24px;
-  font-size: 12px;
-  color: var(--text-muted);
+  font-size: 13px;
+  /* Ukuran font dinaikkan agar terbaca jelas */
+  color: #FBBF24;
+  /* Teks Kuning Emas menyala, dijamin langsung kelihatan */
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 1px solid var(--border-color);
+  letter-spacing: 0.06em;
+  border-bottom: 3px solid #F59E0B;
+  /* Garis bawah header warna oranye emas pembatas */
 }
 
+/* UBAH TOTAL: Badan data tabel dibuat lebih rapat, tebal, dan bergaris tegas */
 .modern-table td {
-  padding: 18px 24px;
+  padding: 16px 24px;
   font-size: 14px;
-  color: var(--text-main);
-  border-bottom: 1px solid #F1F5F9;
-  font-weight: 500;
+  color: #0F172A;
+  /* Teks hitam pekat agar tidak blur saat dibaca */
+  border-bottom: 1px solid #E2E8F0;
+  /* Garis pembatas antar data diperjelas abu-abunya */
+  font-weight: 600;
+  /* Teks dibuat semi-bold supaya tegas */
 }
 
 .modern-table tbody tr {
   transition: background-color 0.15s ease;
 }
 
+/* Efek sorot baris yang kontras saat didekati mouse */
 .modern-table tbody tr:hover {
-  background-color: #F8FAFC;
+  background-color: #F1F5F9;
+  /* Abu-abu sorot lembut */
 }
 
 .modern-table tbody tr:last-child td {
