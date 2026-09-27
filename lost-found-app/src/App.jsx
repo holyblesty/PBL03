@@ -1,10 +1,10 @@
-import React from 'react';
-import UserDashboard from './UserDashboard'; // Sesuaikan path jika ada di dalam folder tertentu
+import AdminDashboard from './AdminDashboard';
+import './App.css';
 
 function App() {
   return (
-    <div>
-      <UserDashboard />
+    <div className="app-container">
+      <AdminDashboard />
     </div>
   );
 }

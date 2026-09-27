@@ -1,7 +1,7 @@
 import React from 'react';
 
 function ReportTable() {
-    // Dummy data contoh laporan
+    // Dummy data contoh laporan barang di admin
     const reports = [
         { id: 1, namaBarang: 'Laptop ASUS ROG', kategori: 'Elektronik', lokasi: 'Gedung A', status: 'Menunggu Verifikasi', tanggal: '26 Sep 2026' },
         { id: 2, namaBarang: 'Dompet Kulit Hitam', kategori: 'Aksesoris', lokasi: 'Kantin Utama', status: 'Dipublikasikan', tanggal: '25 Sep 2026' },
@@ -10,93 +10,83 @@ function ReportTable() {
         { id: 5, namaBarang: 'Jas Lab Kimia', kategori: 'Pakaian', lokasi: 'Laboratorium MIPA', status: 'Menunggu Verifikasi', tanggal: '22 Sep 2026' },
     ];
 
-    const tableHeaderStyle = {
-        padding: '12px 16px',
-        textAlign: 'left',
-        fontSize: '13px',
-        fontWeight: '600',
-        color: '#4B5563',
-        borderBottom: '1px solid #E5E7EB',
-        backgroundColor: '#F9FAFB'
-    };
-
-    const tableCellStyle = {
-        padding: '14px 16px',
-        fontSize: '14px',
-        color: '#1F2937',
-        borderBottom: '1px solid #F3F4F6'
-    };
-
     return (
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', padding: '24px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#111827' }}>Laporan Barang Terbaru</h3>
-                <span style={{ fontSize: '12px', color: '#6B7280', backgroundColor: '#F3F4F6', padding: '4px 10px', borderRadius: '6px', fontWeight: '500' }}>
+        <div className="table-card">
+            {/* Bagian Atas Tabel: Judul & Informasi Jumlah Data */}
+            <div className="table-header-wrapper">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                    <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#111827' }}>
+                        Laporan Barang Terbaru
+                    </h3>
+                    <p style={{ margin: 0, fontSize: '13px', color: '#64748B' }}>
+                        Daftar barang masuk yang perlu dikelola oleh petugas keamanan.
+                    </p>
+                </div>
+                <span style={{ fontSize: '12px', color: '#6B7280', backgroundColor: '#F3F4F6', padding: '6px 12px', borderRadius: '6px', fontWeight: '600' }}>
                     Menampilkan 5 data terkini
                 </span>
             </div>
 
+            {/* Kontainer Tabel Utama */}
             <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                <table className="modern-table">
                     <thead>
                         <tr>
-                            <th style={tableHeaderStyle}>No</th>
-                            <th style={tableHeaderStyle}>Nama Barang</th>
-                            <th style={tableHeaderStyle}>Kategori</th>
-                            <th style={tableHeaderStyle}>Lokasi</th>
-                            <th style={tableHeaderStyle}>Tanggal</th>
-                            <th style={tableHeaderStyle}>Status</th>
+                            <th>No</th>
+                            <th>Nama Barang</th>
+                            <th>Kategori</th>
+                            <th>Lokasi</th>
+                            <th>Tanggal</th>
+                            <th>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {reports.map((item, index) => (
-                            <tr key={item.id} style={{ transition: 'background 0.2s' }}>
-                                <td style={tableCellStyle}>{index + 1}</td>
-                                <td style={{ ...tableCellStyle, fontWeight: '600' }}>{item.namaBarang}</td>
-                                <td style={tableCellStyle}>{item.kategori}</td>
-                                <td style={tableCellStyle}>{item.lokasi}</td>
-                                <td style={tableCellStyle}>{item.tanggal}</td>
-                                <td style={tableCellStyle}>
-                                    <span style={{
-                                        padding: '4px 10px',
-                                        borderRadius: '20px',
-                                        fontSize: '12px',
-                                        fontWeight: '600',
-                                        backgroundColor:
-                                            item.status === 'Dipublikasikan' ? '#DEF7EC' :
-                                                item.status === 'Menunggu Verifikasi' ? '#FEF3C7' : '#E5E7EB',
-                                        color:
-                                            item.status === 'Dipublikasikan' ? '#03543F' :
-                                                item.status === 'Menunggu Verifikasi' ? '#92400E' : '#374151'
-                                    }}>
-                                        {item.status}
-                                    </span>
-                                </td>
-                            </tr>
-                        ))}
+                        {reports.map((item, index) => {
+                            // Fungsi mapping dynamic status badge ke CSS class kita
+                            let statusClass = 'published'; // Default
+                            if (item.status === 'Menunggu Verifikasi') statusClass = 'pending';
+                            if (item.status === 'Dikembalikan') statusClass = 'completed';
+
+                            return (
+                                <tr key={item.id}>
+                                    <td>{index + 1}</td>
+                                    <td>{item.namaBarang}</td>
+                                    <td>{item.kategori}</td>
+                                    <td>{item.lokasi}</td>
+                                    <td>{item.tanggal}</td>
+                                    <td>
+                                        {/* Memakai badge dinamis kelas CSS kontras tinggi */}
+                                        <span className={`badge ${statusClass}`}>
+                                            {item.status}
+                                        </span>
+                                    </td>
+                                </tr>
+                            );
+                        })}
                     </tbody>
                 </table>
             </div>
 
-            {/* Bagian Pagination */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
-                <p style={{ margin: 0, fontSize: '13px', color: '#6B7280' }}>
-                    Halaman <strong style={{ color: '#111827' }}>1</strong> dari <strong style={{ color: '#111827' }}>3</strong>
-                </p>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#F9FAFB', color: '#9CA3AF', cursor: 'not-allowed' }} disabled>
+            {/* Bagian Navigasi Pagination Terintegrasi CSS */}
+            <div className="pagination-wrapper">
+                <span className="pagination-info">
+                    Halaman <strong>1</strong> dari <strong>3</strong>
+                </span>
+
+                <div className="pagination-buttons">
+                    <button className="btn-pagination" disabled>
                         Sebelumnya
                     </button>
-                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #2563EB', backgroundColor: '#2563EB', color: '#ffffff', cursor: 'pointer' }}>
+                    <button className="btn-pagination-number active">
                         1
                     </button>
-                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                    <button className="btn-pagination-number">
                         2
                     </button>
-                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                    <button className="btn-pagination-number">
                         3
                     </button>
-                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                    <button className="btn-pagination-sidebar btn-pagination">
                         Berikutnya
                     </button>
                 </div>

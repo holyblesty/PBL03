@@ -8,17 +8,17 @@ import './App.css';
 function AdminDashboard() {
     return (
         <div className="admin-container">
-            {/* Sidebar di sebelah kiri */}
+            {/* Sidebar di sebelah kiri (terkunci flex-shrink) */}
             <Sidebar />
 
-            {/* Area Kanan: Dibagi jadi Navbar di atas & Main Content di bawah */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
+            {/* Area Kanan: Menggunakan admin-main agar sistem scroll-y terkunci otomatis */}
+            <div className="admin-main" style={{ padding: 0 }}>
 
                 {/* Panggil Navbar */}
                 <Navbar />
 
-                {/* Main Content Area di sebelah kanan */}
-                <main className="admin-main">
+                {/* Kontainer Konten Utama */}
+                <main className="dashboard-content">
                     <header className="admin-header">
                         <h1>Dashboard Admin</h1>
                         <p>Selamat datang kembali, Admin!</p>
