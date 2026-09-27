@@ -1,6 +1,8 @@
 import React from 'react';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import StatsGrid from './components/StatsGrid';
+import ReportTable from './components/ReportTable';
 import './App.css';
 
 function AdminDashboard() {
@@ -22,21 +24,11 @@ function AdminDashboard() {
                         <p>Selamat datang kembali, Admin!</p>
                     </header>
 
-                    {/* Kotak Konten Statistik */}
-                    <div className="stats-grid">
-                        <div className="stat-card">
-                            <h3>Barang Hilang</h3>
-                            <p className="stat-blue">12</p>
-                        </div>
-                        <div className="stat-card">
-                            <h3>Barang Ditemukan</h3>
-                            <p className="stat-green">8</p>
-                        </div>
-                        <div className="stat-card">
-                            <h3>Total Pengguna</h3>
-                            <p className="stat-yellow">45</p>
-                        </div>
-                    </div>
+                    {/* Komponen Kotak Statistik */}
+                    <StatsGrid />
+
+                    {/* Komponen Tabel Laporan dengan .map() */}
+                    <ReportTable />
                 </main>
             </div>
         </div>
