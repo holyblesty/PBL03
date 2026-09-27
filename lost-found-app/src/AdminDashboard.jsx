@@ -1,16 +1,38 @@
 import React from 'react';
+import Sidebar from './components/Sidebar';
+import './App.css';
 
-export default function AdminDashboard() {
+function AdminDashboard() {
     return (
-        <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-            <h2>Dashboard Pamdal (Admin)</h2>
-            <p>Ini adalah halaman untuk petugas memverifikasi barang hilang dan temuan.</p>
+        <div className="admin-container">
+            {/* Sidebar di sebelah kiri */}
+            <Sidebar />
 
-            <div style={{ marginTop: '20px', border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
-                <h3>Daftar Laporan Masuk</h3>
-                <p>Belum ada laporan saat ini.</p>
-                {/* Nanti di sini kita buatkan tabel daftar barangnya */}
-            </div>
+            {/* Main Content Area di sebelah kanan */}
+            <main className="admin-main">
+                <header className="admin-header">
+                    <h1>Dashboard Admin</h1>
+                    <p>Selamat datang kembali, Admin!</p>
+                </header>
+
+                {/* Kotak Konten Statistik */}
+                <div className="stats-grid">
+                    <div className="stat-card">
+                        <h3>Barang Hilang</h3>
+                        <p className="stat-blue">12</p>
+                    </div>
+                    <div className="stat-card">
+                        <h3>Barang Ditemukan</h3>
+                        <p className="stat-green">8</p>
+                    </div>
+                    <div className="stat-card">
+                        <h3>Total Pengguna</h3>
+                        <p className="stat-yellow">45</p>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 }
+
+export default AdminDashboard;
