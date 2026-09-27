@@ -1,6 +1,6 @@
 import React from 'react';
-import Sidebar from './components/Sidebar';
-import Navbar from './components/Navbar';
+import Sidebar from './components/AdminSidebar';
+import Navbar from './components/AdminNavbar';
 import StatsGrid from './components/StatsGrid';
 import ReportTable from './components/ReportTable';
 import './App.css';
