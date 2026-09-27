@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function UserSidebar() {
     return (
-        <aside style={{ width: '260px', backgroundColor: '#FFFFFF', borderRight: '1px solid #E5E7EB', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', boxSizing: 'border-box' }}>
+        <aside style={{ width: '260px', minWidth: '260px', backgroundColor: '#FFFFFF', borderRight: '1px solid #E5E7EB', padding: '24px', display: 'flex', flexDirection: 'column', gap: '24px', boxSizing: 'border-box' }}>
             <div>
                 <h1 style={{ fontSize: '18px', fontWeight: '800', color: '#2563EB', margin: '0 0 4px 0' }}>Lost & Found</h1>
                 <p style={{ fontSize: '12px', color: '#6B7280', margin: 0 }}>Portal Pengguna Kampus</p>
