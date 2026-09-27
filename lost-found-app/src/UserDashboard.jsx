@@ -24,46 +24,37 @@ export default function UserDashboard() {
                 <UserNavbar />
 
                 <div className="dashboard-content">
-                    <div style={{ marginBottom: '32px' }}>
-                        <h2 style={{ margin: '0 0 6px 0', fontSize: '26px', fontWeight: '800', color: '#111827', letterSpacing: '-0.5px' }}>
-                            Halo, Selamat Datang!
-                        </h2>
-                        <p style={{ margin: 0, fontSize: '14px', color: '#64748B', fontWeight: '500' }}>
-                            Kelola laporan barang hilang atau temuan Anda dengan cepat di sini.
-                        </p>
+
+                    {/* Header: Bersih tanpa inline style kaku */}
+                    <div className="admin-header">
+                        <h1>Halo, Selamat Datang!</h1>
+                        <p>Kelola laporan barang hilang atau temuan Anda dengan cepat di sini.</p>
                     </div>
 
+                    {/* Statistik Kartu: Memakai utility class warna teks dari App.css */}
                     <div className="card-stats-container">
                         <div className="dashboard-card">
-                            <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Laporan Kehilangan Aktif
-                            </h4>
-                            {/* Mengubah warna teks angka menjadi oranye emas agar kontras dan serasi */}
-                            <p style={{ margin: 0, fontSize: '32px', fontWeight: '800', color: '#F59E0B', letterSpacing: '-1px' }}>1</p>
+                            <h3>Laporan Kehilangan Aktif</h3>
+                            <p className="stat-yellow">1</p>
                         </div>
                         <div className="dashboard-card">
-                            <h4 style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#64748B', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Barang Temuan Dilaporkan
-                            </h4>
-                            {/* Mengubah warna teks angka menjadi hijau sukses resmi sesuai palet */}
-                            <p style={{ margin: 0, fontSize: '32px', fontWeight: '800', color: '#10B981', letterSpacing: '-1px' }}>1</p>
+                            <h3>Barang Temuan Dilaporkan</h3>
+                            <p className="stat-green">1</p>
                         </div>
                     </div>
 
+                    {/* Tombol Aksi */}
                     <div className="action-buttons">
                         <button className="btn-primary">+ Lapor Barang Hilang</button>
                         <button className="btn-secondary">+ Lapor Barang Temuan</button>
                     </div>
 
-                    {/* Tabel dengan Kelas CSS Terpisah */}
+                    {/* Tabel Utama */}
                     <div className="table-card">
                         <div className="table-header-wrapper">
-                            <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#111827' }}>
-                                Riwayat Laporan Saya
-                            </h3>
+                            <h3>Riwayat Laporan Saya</h3>
 
                             <div className="search-input-wrapper">
-                                {/* SVG ikon diletakkan di atas input agar meluruskan posisinya */}
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                                     <circle cx="11" cy="11" r="8" />
                                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
@@ -93,9 +84,9 @@ export default function UserDashboard() {
                                             const isCompleted = item.status.includes('Selesai');
                                             return (
                                                 <tr key={item.id}>
-                                                    <td style={{ fontWeight: '600', color: '#111827' }}>{item.namaBarang}</td>
-                                                    <td style={{ color: '#4B5563', fontWeight: '500' }}>{item.jenis}</td>
-                                                    <td style={{ color: '#64748B' }}>{item.tanggal}</td>
+                                                    <td>{item.namaBarang}</td>
+                                                    <td>{item.jenis}</td>
+                                                    <td>{item.tanggal}</td>
                                                     <td>
                                                         <span className={`badge ${isCompleted ? 'completed' : 'published'}`}>
                                                             {item.status}
@@ -106,7 +97,7 @@ export default function UserDashboard() {
                                         })
                                     ) : (
                                         <tr>
-                                            <td colSpan="4" style={{ textAlign: 'center', color: '#64748B', padding: '32px', fontWeight: '600' }}>
+                                            <td colSpan="4" style={{ textAlign: 'center', padding: '32px' }}>
                                                 Tidak ada laporan yang cocok dengan pencarian "{searchQuery}"
                                             </td>
                                         </tr>
@@ -120,3 +111,4 @@ export default function UserDashboard() {
         </div>
     );
 }
+
