@@ -1,83 +1,105 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function ReportTable() {
-    // Data dummy untuk daftar laporan barang hilang/ditemukan
-    const [dummyReports] = useState([
-        { id: 'LAP-001', namaBarang: 'Dompet Kulit Hitam', kategori: 'Barang Hilang', lokasi: 'Gedung Rektorat Lt. 2', tanggal: '26 Sep 2026', status: 'Menunggu Verifikasi' },
-        { id: 'LAP-002', namaBarang: 'Laptop ASUS ROG Strix', kategori: 'Barang Ditemukan', lokasi: 'Perpustakaan Pusat', tanggal: '25 Sep 2026', status: 'Diamankan di Posko' },
-        { id: 'LAP-003', namaBarang: 'Kunci Motor Honda Beat', kategori: 'Barang Hilang', lokasi: 'Parkiran Fakultas Teknik', tanggal: '25 Sep 2026', status: 'Selesai / Diambil' },
-        { id: 'LAP-004', namaBarang: 'Tumbler Corkcicle Biru', kategori: 'Barang Ditemukan', lokasi: 'Kantin Gedung A', tanggal: '24 Sep 2026', status: 'Menunggu Verifikasi' },
-        { id: 'LAP-005', namaBarang: 'Kartu Identitas Mahasiswa (KTM)', kategori: 'Barang Ditemukan', lokasi: 'Lab Komputer Lt. 3', tanggal: '24 Sep 2026', status: 'Selesai / Diambil' },
-    ]);
+    // Dummy data contoh laporan
+    const reports = [
+        { id: 1, namaBarang: 'Laptop ASUS ROG', kategori: 'Elektronik', lokasi: 'Gedung A', status: 'Menunggu Verifikasi', tanggal: '26 Sep 2026' },
+        { id: 2, namaBarang: 'Dompet Kulit Hitam', kategori: 'Aksesoris', lokasi: 'Kantin Utama', status: 'Dipublikasikan', tanggal: '25 Sep 2026' },
+        { id: 3, namaBarang: 'Kunci Motor Honda', kategori: 'Kendaraan', lokasi: 'Parkiran Basement', status: 'Dipublikasikan', tanggal: '24 Sep 2026' },
+        { id: 4, namaBarang: 'Tumbler Tupperware', kategori: 'Pribadi', lokasi: 'Perpustakaan', status: 'Dikembalikan', tanggal: '23 Sep 2026' },
+        { id: 5, namaBarang: 'Jas Lab Kimia', kategori: 'Pakaian', lokasi: 'Laboratorium MIPA', status: 'Menunggu Verifikasi', tanggal: '22 Sep 2026' },
+    ];
 
-    // Fungsi kecil untuk menentukan warna badge status
-    const getStatusBadgeStyle = (status) => {
-        if (status.includes('Selesai')) {
-            return { backgroundColor: '#DEF7EC', color: '#03543F' };
-        } else if (status.includes('Diamankan')) {
-            return { backgroundColor: '#E1EFFE', color: '#1E429F' };
-        } else {
-            return { backgroundColor: '#FEF08A', color: '#713F12' };
-        }
+    const tableHeaderStyle = {
+        padding: '12px 16px',
+        textAlign: 'left',
+        fontSize: '13px',
+        fontWeight: '600',
+        color: '#4B5563',
+        borderBottom: '1px solid #E5E7EB',
+        backgroundColor: '#F9FAFB'
+    };
+
+    const tableCellStyle = {
+        padding: '14px 16px',
+        fontSize: '14px',
+        color: '#1F2937',
+        borderBottom: '1px solid #F3F4F6'
     };
 
     return (
-        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #E5E7EB', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #E5E7EB', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700', color: '#111827' }}>Laporan Barang Terbaru</h3>
-                <span style={{ fontSize: '12px', fontWeight: '600', color: '#6B7280', backgroundColor: '#F3F4F6', padding: '4px 10px', borderRadius: '20px' }}>
+        <div style={{ backgroundColor: '#ffffff', borderRadius: '12px', border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', padding: '24px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '700', color: '#111827' }}>Laporan Barang Terbaru</h3>
+                <span style={{ fontSize: '12px', color: '#6B7280', backgroundColor: '#F3F4F6', padding: '4px 10px', borderRadius: '6px', fontWeight: '500' }}>
                     Menampilkan 5 data terkini
                 </span>
             </div>
 
             <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
-                        <tr style={{ backgroundColor: '#F9FAFB', borderBottom: '1px solid #E5E7EB', color: '#4B5563', fontSize: '12px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                            <th style={{ padding: '12px 24px' }}>ID Laporan</th>
-                            <th style={{ padding: '12px 24px' }}>Nama Barang</th>
-                            <th style={{ padding: '12px 24px' }}>Kategori</th>
-                            <th style={{ padding: '12px 24px' }}>Lokasi</th>
-                            <th style={{ padding: '12px 24px' }}>Tanggal</th>
-                            <th style={{ padding: '12px 24px' }}>Status</th>
+                        <tr>
+                            <th style={tableHeaderStyle}>No</th>
+                            <th style={tableHeaderStyle}>Nama Barang</th>
+                            <th style={tableHeaderStyle}>Kategori</th>
+                            <th style={tableHeaderStyle}>Lokasi</th>
+                            <th style={tableHeaderStyle}>Tanggal</th>
+                            <th style={tableHeaderStyle}>Status</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {dummyReports.map((row, index) => (
-                            <tr
-                                key={index}
-                                style={{ borderBottom: '1px solid #F3F4F6', transition: 'background-color 0.1s' }}
-                                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-                                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                            >
-                                <td style={{ padding: '14px 24px', fontWeight: '600', color: '#111827' }}>{row.id}</td>
-                                <td style={{ padding: '14px 24px', fontWeight: '600', color: '#1F2937' }}>{row.namaBarang}</td>
-                                <td style={{ padding: '14px 24px' }}>
-                                    <span style={{
-                                        fontWeight: '600',
-                                        fontSize: '12px',
-                                        color: row.kategori === 'Barang Hilang' ? '#B91C1C' : '#047857'
-                                    }}>
-                                        {row.kategori}
-                                    </span>
-                                </td>
-                                <td style={{ padding: '14px 24px', color: '#4B5563' }}>{row.lokasi}</td>
-                                <td style={{ padding: '14px 24px', color: '#4B5563' }}>{row.tanggal}</td>
-                                <td style={{ padding: '14px 24px' }}>
+                        {reports.map((item, index) => (
+                            <tr key={item.id} style={{ transition: 'background 0.2s' }}>
+                                <td style={tableCellStyle}>{index + 1}</td>
+                                <td style={{ ...tableCellStyle, fontWeight: '600' }}>{item.namaBarang}</td>
+                                <td style={tableCellStyle}>{item.kategori}</td>
+                                <td style={tableCellStyle}>{item.lokasi}</td>
+                                <td style={tableCellStyle}>{item.tanggal}</td>
+                                <td style={tableCellStyle}>
                                     <span style={{
                                         padding: '4px 10px',
-                                        borderRadius: '6px',
+                                        borderRadius: '20px',
                                         fontSize: '12px',
-                                        fontWeight: '700',
-                                        ...getStatusBadgeStyle(row.status)
+                                        fontWeight: '600',
+                                        backgroundColor:
+                                            item.status === 'Dipublikasikan' ? '#DEF7EC' :
+                                                item.status === 'Menunggu Verifikasi' ? '#FEF3C7' : '#E5E7EB',
+                                        color:
+                                            item.status === 'Dipublikasikan' ? '#03543F' :
+                                                item.status === 'Menunggu Verifikasi' ? '#92400E' : '#374151'
                                     }}>
-                                        {row.status}
+                                        {item.status}
                                     </span>
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+            </div>
+
+            {/* Bagian Pagination */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #E5E7EB' }}>
+                <p style={{ margin: 0, fontSize: '13px', color: '#6B7280' }}>
+                    Halaman <strong style={{ color: '#111827' }}>1</strong> dari <strong style={{ color: '#111827' }}>3</strong>
+                </p>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#F9FAFB', color: '#9CA3AF', cursor: 'not-allowed' }} disabled>
+                        Sebelumnya
+                    </button>
+                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #2563EB', backgroundColor: '#2563EB', color: '#ffffff', cursor: 'pointer' }}>
+                        1
+                    </button>
+                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                        2
+                    </button>
+                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                        3
+                    </button>
+                    <button style={{ padding: '6px 12px', fontSize: '13px', fontWeight: '500', borderRadius: '6px', border: '1px solid #D1D5DB', backgroundColor: '#ffffff', color: '#374151', cursor: 'pointer' }}>
+                        Berikutnya
+                    </button>
+                </div>
             </div>
         </div>
     );
