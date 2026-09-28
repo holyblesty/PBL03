@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 function ReportTable() {
-    // Dummy data contoh laporan barang di admin
+    // 1. State untuk melacak halaman aktif saat ini di sisi admin
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3; // Batas maksimal baris data per halaman admin
+
+    // Dummy data contoh laporan barang di admin (diperbanyak untuk simulasi)
     const reports = [
         { id: 1, namaBarang: 'Laptop ASUS ROG', kategori: 'Elektronik', lokasi: 'Gedung A', status: 'Menunggu Verifikasi', tanggal: '26 Sep 2026' },
         { id: 2, namaBarang: 'Dompet Kulit Hitam', kategori: 'Aksesoris', lokasi: 'Kantin Utama', status: 'Dipublikasikan', tanggal: '25 Sep 2026' },
@@ -9,6 +13,14 @@ function ReportTable() {
         { id: 4, namaBarang: 'Tumbler Tupperware', kategori: 'Pribadi', lokasi: 'Perpustakaan', status: 'Dikembalikan', tanggal: '23 Sep 2026' },
         { id: 5, namaBarang: 'Jas Lab Kimia', kategori: 'Pakaian', lokasi: 'Laboratorium MIPA', status: 'Menunggu Verifikasi', tanggal: '22 Sep 2026' },
     ];
+
+    // 2. Rumus Matematika Pemotongan Data per Halaman Admin
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentItems = reports.slice(indexOfFirstItem, indexOfLastItem);
+
+    // Hitung total halaman yang dihasilkan
+    const totalPages = Math.ceil(reports.length / itemsPerPage);
 
     return (
         <div className="table-card">
@@ -41,21 +53,21 @@ function ReportTable() {
                         </tr>
                     </thead>
                     <tbody>
-                        {reports.map((item, index) => {
-                            // Fungsi mapping dynamic status badge ke CSS class kita
-                            let statusClass = 'published'; // Default
+                        {/* Merender data potongan (currentItems) secara dinamis */}
+                        {currentItems.map((item, index) => {
+                            let statusClass = 'published';
                             if (item.status === 'Menunggu Verifikasi') statusClass = 'pending';
                             if (item.status === 'Dikembalikan') statusClass = 'completed';
 
                             return (
                                 <tr key={item.id}>
-                                    <td>{index + 1}</td>
+                                    {/* Kalkulasi nomor urut agar tetap berlanjut di halaman 2 */}
+                                    <td>{indexOfFirstItem + index + 1}</td>
                                     <td>{item.namaBarang}</td>
                                     <td>{item.kategori}</td>
                                     <td>{item.lokasi}</td>
                                     <td>{item.tanggal}</td>
                                     <td>
-                                        {/* Memakai badge dinamis kelas CSS kontras tinggi */}
                                         <span className={`badge ${statusClass}`}>
                                             {item.status}
                                         </span>
@@ -67,26 +79,39 @@ function ReportTable() {
                 </table>
             </div>
 
-            {/* Bagian Navigasi Pagination Terintegrasi CSS */}
+            {/* 3. BAGIAN NAVIGASI PAGINATION (SEKARANG SUDAH DINAMIS & SAMA DENGAN USER) */}
             <div className="pagination-wrapper">
                 <span className="pagination-info">
-                    Halaman <strong>1</strong> dari <strong>3</strong>
+                    Menampilkan {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, reports.length)} dari {reports.length} data
                 </span>
 
                 <div className="pagination-buttons">
-                    <button className="btn-pagination" disabled>
+                    {/* Tombol Sebelumnya */}
+                    <button
+                        className="btn-pagination"
+                        disabled={currentPage === 1}
+                        onClick={() => setCurrentPage(prev => prev - 1)}
+                    >
                         Sebelumnya
                     </button>
-                    <button className="btn-pagination-number active">
-                        1
-                    </button>
-                    <button className="btn-pagination-number">
-                        2
-                    </button>
-                    <button className="btn-pagination-number">
-                        3
-                    </button>
-                    <button className="btn-pagination-sidebar btn-pagination">
+
+                    {/* Urutan Angka Halaman Dinamis */}
+                    {Array.from({ length: totalPages }, (_, index) => (
+                        <button
+                            key={index + 1}
+                            className={`btn-pagination-number ${currentPage === index + 1 ? 'active' : ''}`}
+                            onClick={() => setCurrentPage(index + 1)}
+                        >
+                            {index + 1}
+                        </button>
+                    ))}
+
+                    {/* Tombol Berikutnya */}
+                    <button
+                        className="btn-pagination"
+                        disabled={currentPage === totalPages}
+                        onClick={() => setCurrentPage(prev => prev + 1)}
+                    >
                         Berikutnya
                     </button>
                 </div>
