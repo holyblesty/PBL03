@@ -4,7 +4,6 @@ function Sidebar() {
     const [activeMenu, setActiveMenu] = useState('dashboard');
     const [hoveredMenu, setHoveredMenu] = useState(null);
 
-    // List menu dengan tambahan properti icon berupa fungsi SVG path
     const menuItems = [
         {
             id: 'dashboard',
@@ -20,14 +19,38 @@ function Sidebar() {
             )
         },
         {
-            id: 'laporan',
-            name: 'Daftar Barang',
-            path: '#laporan',
+            id: 'barang-hilang',
+            name: 'Daftar Barang Hilang',
+            path: '#barang-hilang',
+            icon: (color) => (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                    <line x1="11" y1="8" x2="11" y2="12" />
+                    <line x1="11" y1="16" x2="11.01" y2="16" />
+                </svg>
+            )
+        },
+        {
+            id: 'barang-temuan',
+            name: 'Daftar Barang Temuan',
+            path: '#barang-temuan',
             icon: (color) => (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                     <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
                     <line x1="12" y1="22.08" x2="12" y2="12" />
+                </svg>
+            )
+        },
+        {
+            id: 'barang-expired',
+            name: 'Daftar Barang Lewat 30 Hari',
+            path: '#barang-expired',
+            icon: (color) => (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
                 </svg>
             )
         },
@@ -80,19 +103,19 @@ function Sidebar() {
 
     return (
         <aside style={{
-            width: '270px', // Lebar dinaikkan dikit agar muat teks dan ikon dengan leluasa
+            width: '280px',
             backgroundColor: colors.bgSidebar,
             color: '#FFFFFF',
             padding: '24px 16px',
             height: '100vh',
             boxSizing: 'border-box',
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            boxShadow: '4px 0px 10px rgba(0,0,0,0.3)'
+            boxShadow: '4px 0px 10px rgba(0,0,0,0.3)',
+            overflowY: 'auto'
         }}>
             {/* Header Panel */}
-            <div style={{ marginBottom: '32px', paddingLeft: '8px', borderBottom: '1px solid #374151', paddingBottom: '16px' }}>
+            <div style={{ marginBottom: '24px', paddingLeft: '8px', borderBottom: '1px solid #374151', paddingBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    {/* Logo Perisai Keamanan Kampus */}
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.textActive} strokeWidth="2.5">
                         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     </svg>
@@ -107,19 +130,18 @@ function Sidebar() {
                     textTransform: 'uppercase',
                     letterSpacing: '1.5px',
                     margin: 0,
-                    paddingLeft: '34px' // Meluruskan dengan teks judul
+                    paddingLeft: '34px'
                 }}>
                     KEAMANAN KAMPUS
                 </p>
             </div>
 
             {/* Navigasi Menu */}
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 {menuItems.map((item) => {
                     const isActive = activeMenu === item.id;
                     const isHovered = hoveredMenu === item.id;
 
-                    // Menentukan warna ikon secara dinamis
                     const currentIconColor = isActive ? colors.textActive : (isHovered ? '#FFFFFF' : colors.textNormal);
 
                     return (
@@ -132,12 +154,13 @@ function Sidebar() {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px', // Jarak antara ikon dan teks menu
-                                fontSize: '15px',
+                                justifyContent: 'flex-start',
+                                gap: '12px',
+                                fontSize: '14px',
                                 fontWeight: isActive ? '700' : '600',
                                 color: currentIconColor,
                                 textDecoration: 'none',
-                                padding: '14px 16px',
+                                padding: '12px 16px',
                                 borderRadius: '8px',
                                 backgroundColor: isActive ? colors.bgActive : (isHovered ? '#1F2937' : 'transparent'),
                                 borderLeft: isActive ? `5px solid ${colors.accentLine}` : '5px solid transparent',
@@ -145,9 +168,12 @@ function Sidebar() {
                                 paddingLeft: isActive ? '11px' : '16px'
                             }}
                         >
-                            {/* Render Ikon SVG */}
-                            {item.icon(currentIconColor)}
-                            <span>{item.name}</span>
+                            <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                                {item.icon(currentIconColor)}
+                            </span>
+                            <span style={{ textAlign: 'left', lineHeight: '1.3' }}>
+                                {item.name}
+                            </span>
                         </a>
                     );
                 })}
