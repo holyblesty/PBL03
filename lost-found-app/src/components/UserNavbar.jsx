@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export default function UserNavbar({ searchTerm, onSearchChange }) {
+export default function UserNavbar() {
     const [showNotifications, setShowNotifications] = useState(false);
     const [hasNewNotif, setHasNewNotif] = useState(true);
 
@@ -38,27 +38,13 @@ export default function UserNavbar({ searchTerm, onSearchChange }) {
             borderBottom: '1px solid #E5E7EB',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
+            justifyContent: 'flex-end', // Diubah jadi flex-end karena search bar-nya dihilangkan
             padding: '0 24px',
             boxSizing: 'border-box',
             position: 'relative',
             fontFamily: 'system-ui, -apple-system, sans-serif',
             width: '100%'
         }}>
-
-            {/* 1. Kolom Search Filter di Navbar - Singkron Otomatis ke App.css */}
-            <div className="search-input-wrapper">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6B7280" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                    type="text"
-                    placeholder="Cari riwayat laporan..."
-                    value={searchTerm}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                />
-            </div>
 
             {/* Bagian Kanan: Notifikasi & Profil */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -84,7 +70,6 @@ export default function UserNavbar({ searchTerm, onSearchChange }) {
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
                         title="Notifikasi"
                     >
-                        {/* Mengganti emoji lonceng pudar dengan SVG Outline Profesional */}
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#111827" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
@@ -127,7 +112,7 @@ export default function UserNavbar({ searchTerm, onSearchChange }) {
                 {/* Pembatas Vertikal */}
                 <div style={{ width: '1px', height: '24px', backgroundColor: '#E5E7EB' }}></div>
 
-                {/* Profil Pengguna - Diubah Menjadi Tema Hitam Emas Sinkron */}
+                {/* Profil Pengguna */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <div style={{ textAlign: 'right' }}>
                         <p style={{ margin: 0, fontSize: '14px', fontWeight: '750', color: '#111827' }}>
@@ -137,7 +122,6 @@ export default function UserNavbar({ searchTerm, onSearchChange }) {
                             Portal Pengguna
                         </p>
                     </div>
-                    {/* Avatar Inisial Bulat menggunakan warna dasar Hitam Arang & Kuning Emas */}
                     <div style={{
                         width: '38px',
                         height: '38px',
