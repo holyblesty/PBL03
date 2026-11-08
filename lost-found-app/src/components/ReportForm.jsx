@@ -1,6 +1,6 @@
 /**
  * File: ReportForm.jsx
- * Fungsi: Menyediakan formulir pelaporan kehilangan dan penemuan barang, termasuk validasi data, unggah foto, tanda tangan digital, serta pengiriman dan pengeditan laporan.
+ * Fungsi: Menyediakan formulir pelaporan kehilangan dan penemuan barang, termasuk validasi, unggah foto, tanda tangan digital, dan penggunaan kembali data formulir sebelumnya.
  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
  */
 
@@ -67,98 +67,162 @@ const RELIGIONS = [
 
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
 
-// Alur laporan penemuan: barang diserahkan ke pamdal dulu, baru dipublikasikan.
 const STATUS_PUBLISHED = "Dipublikasikan";
 const STATUS_WAITING_PAMDAL = "Menunggu Penerimaan Barang";
 
-const compressPhoto = (file) =>
-    new Promise((resolve, reject) => {
-        if (!file) {
-            resolve(null);
-            return;
-        }
+const PREVIOUS_FORM_STORAGE_KEY = "lost_found_previous_form_data";
 
-        const reader = new FileReader();
-        reader.onload = () => {
-            const image = new Image();
-            image.onload = () => {
-                const maxDimension = 1200;
-                const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
-                const canvas = document.createElement("canvas");
-                canvas.width = Math.max(1, Math.round(image.width * scale));
-                canvas.height = Math.max(1, Math.round(image.height * scale));
+// Foto dan tanda tangan tidak digunakan kembali.
+const getReusableFormData = (formData) => {
+    const {
+        ttdPelapor,
+        ttdSaksi,
+        ttdPamdal,
+        foto,
+        ...reusableData
+    } = formData || {};
 
-                const context = canvas.getContext("2d");
-                if (!context) {
-                    reject(new Error("Foto tidak dapat diproses."));
-                    return;
-                }
+    return reusableData;
+};
 
-                context.fillStyle = "#FFFFFF";
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(image, 0, 0, canvas.width, canvas.height);
-                resolve(canvas.toDataURL("image/jpeg", 0.75));
-            };
-            image.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
-            image.src = reader.result;
-        };
-        reader.onerror = () => reject(new Error("Foto gagal dibaca."));
-        reader.readAsDataURL(file);
-    });
+const getAllPreviousFormData = () => {
+    try {
+        return JSON.parse(
+            localStorage.getItem(PREVIOUS_FORM_STORAGE_KEY) || "{}"
+        );
+    } catch (error) {
+        console.error(
+            "Data formulir sebelumnya gagal dibaca:",
+            error
+        );
+        return {};
+    }
+};
+
+const getPreviousFormData = (formType) =>
+    getAllPreviousFormData()[formType] || null;
+
+const savePreviousFormData = (formType, formData) => {
+    try {
+        const previousData = getAllPreviousFormData();
+
+        localStorage.setItem(
+            PREVIOUS_FORM_STORAGE_KEY,
+            JSON.stringify({
+                ...previousData,
+                [formType]: getReusableFormData(formData),
+            })
+        );
+    } catch (error) {
+        console.error(
+            "Data formulir sebelumnya gagal disimpan:",
+            error
+        );
+    }
+};
 
 export default function ReportForm({
-    initialReport = null,
+    onBack,
     onSubmitReport,
-    onCancelEdit,
 }) {
-    const isEditing = Boolean(initialReport);
-    const isInitialLostReport = initialReport?.jenisLaporan === "hilang";
-    const [page, setPage] = useState(() =>
-        initialReport ? (isInitialLostReport ? "hilang" : "temuan") : "pilihan"
-    );
-    const [lostForm, setLostForm] = useState(() =>
-        isInitialLostReport
-            ? { ...INITIAL_LOST_FORM, ...initialReport }
-            : { ...INITIAL_LOST_FORM }
-    );
-    const [foundForm, setFoundForm] = useState(() =>
-        initialReport && !isInitialLostReport
-            ? { ...INITIAL_FOUND_FORM, ...initialReport }
-            : { ...INITIAL_FOUND_FORM }
-    );
-    const [lostPhoto, setLostPhoto] = useState(() =>
-        isInitialLostReport ? initialReport?.foto || null : null
-    );
-    const [foundPhoto, setFoundPhoto] = useState(() =>
-        initialReport && !isInitialLostReport ? initialReport?.foto || null : null
-    );
+    const [page, setPage] = useState("pilihan");
+
+    const [lostForm, setLostForm] = useState({
+        ...INITIAL_LOST_FORM,
+    });
+
+    const [foundForm, setFoundForm] = useState({
+        ...INITIAL_FOUND_FORM,
+    });
+
+    const [lostPhoto, setLostPhoto] = useState(null);
+    const [foundPhoto, setFoundPhoto] = useState(null);
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [confirmed, setConfirmed] = useState(Boolean(initialReport));
+    const [confirmed, setConfirmed] = useState(false);
+    const [photoError, setPhotoError] = useState("");
+
     const [signatureErrors, setSignatureErrors] = useState({});
     const [signatureDrafts, setSignatureDrafts] = useState({});
+
     const [resetCount, setResetCount] = useState(0);
+    const [hasPreviousData, setHasPreviousData] = useState(false);
+
+    const uploadRef = useRef(null);
     const photoInputRef = useRef(null);
 
     const isLost = page === "hilang";
+
     const currentForm = isLost ? lostForm : foundForm;
     const currentPhoto = isLost ? lostPhoto : foundPhoto;
 
-    const setCurrentForm = isLost ? setLostForm : setFoundForm;
-    const setCurrentPhoto = isLost ? setLostPhoto : setFoundPhoto;
+    const setCurrentForm = isLost
+        ? setLostForm
+        : setFoundForm;
 
+    const setCurrentPhoto = isLost
+        ? setLostPhoto
+        : setFoundPhoto;
+
+    // Menggunakan kembali data formulir sebelumnya.
+    const handleUsePreviousData = () => {
+        const formType = isLost ? "hilang" : "temuan";
+
+        const previousData = getPreviousFormData(formType);
+
+        if (!previousData) {
+            setHasPreviousData(false);
+            setError(
+                "Belum ada data formulir sebelumnya untuk digunakan."
+            );
+            return;
+        }
+
+        const initialData = isLost
+            ? INITIAL_LOST_FORM
+            : INITIAL_FOUND_FORM;
+
+        setCurrentForm({
+            ...initialData,
+            ...previousData,
+            ttdPelapor: null,
+            ttdSaksi: null,
+            ttdPamdal: null,
+        });
+
+        setCurrentPhoto(null);
+
+        setSignatureErrors({});
+        setSignatureDrafts({});
+
+        setResetCount((count) => count + 1);
+        setConfirmed(false);
+        setPhotoError("");
+        setError("");
+
+        if (photoInputRef.current) {
+            photoInputRef.current.value = "";
+        }
+    };
+
+    // Mengubah nilai input formulir.
     const handleInputChange = (event) => {
         const { name, value } = event.target;
+
         setCurrentForm((previous) => ({
             ...previous,
             [name]: value,
         }));
+
         setError("");
     };
 
+    // Memvalidasi foto yang diunggah.
     const handlePhotoChange = (event) => {
         const file = event.target.files?.[0];
+
         if (!file) return;
 
         if (!file.type.startsWith("image/")) {
@@ -174,24 +238,38 @@ export default function ReportForm({
         }
 
         setCurrentPhoto(file);
+        setPhotoError("");
         setError("");
     };
 
+    // Menyimpan tanda tangan digital.
     const handleSignatureChange = (key, dataUrl) => {
         setCurrentForm((previous) => ({
             ...previous,
             [key]: dataUrl,
         }));
-        setSignatureErrors((previous) => ({ ...previous, [key]: "" }));
+
+        setSignatureErrors((previous) => ({
+            ...previous,
+            [key]: "",
+        }));
+
         setError("");
     };
 
+    // Memeriksa tanda tangan yang belum disimpan.
     const handleSignatureDraft = (key, hasDraft) => {
         setSignatureDrafts((previous) =>
-            previous[key] === hasDraft ? previous : { ...previous, [key]: hasDraft }
+            previous[key] === hasDraft
+                ? previous
+                : {
+                    ...previous,
+                    [key]: hasDraft,
+                }
         );
     };
 
+    // Mengembalikan formulir ke kondisi awal.
     const handleReset = () => {
         if (isLost) {
             setLostForm({ ...INITIAL_LOST_FORM });
@@ -204,24 +282,30 @@ export default function ReportForm({
         if (photoInputRef.current) {
             photoInputRef.current.value = "";
         }
+
         setConfirmed(false);
+        setPhotoError("");
         setSignatureErrors({});
         setSignatureDrafts({});
+
         setResetCount((count) => count + 1);
         setError("");
     };
 
+    // Kembali ke pilihan jenis laporan.
     const handleBackToChoices = () => {
+        setPhotoError("");
         setSignatureErrors({});
         setPage("pilihan");
         setError("");
     };
 
+    // Memvalidasi dan mengirim laporan.
     const handleSubmit = async (event) => {
         event?.preventDefault();
+
         setError("");
-
-
+        setPhotoError("");
 
         const requiredFields = isLost
             ? [
@@ -250,90 +334,149 @@ export default function ReportForm({
             ];
 
         const hasEmptyField = requiredFields.some(
-            (field) => !String(currentForm[field] ?? "").trim()
+            (field) =>
+                !String(currentForm[field] ?? "").trim()
         );
 
         if (hasEmptyField) {
-            setError("Lengkapi semua kolom wajib yang bertanda *.");
+            setError(
+                "Lengkapi semua kolom wajib yang bertanda *."
+            );
             return;
         }
 
         const signatureFields = isLost
             ? [
-                { key: "ttdPelapor", label: "pelapor", required: true },
-                { key: "ttdSaksi", label: "saksi", required: false },
+                {
+                    key: "ttdPelapor",
+                    label: "pelapor",
+                    required: true,
+                },
+                {
+                    key: "ttdSaksi",
+                    label: "saksi",
+                    required: false,
+                },
             ]
             : [
-                { key: "ttdPelapor", label: "pelapor", required: true },
-                { key: "ttdPamdal", label: "pamdal", required: true },
+                {
+                    key: "ttdPelapor",
+                    label: "pelapor",
+                    required: true,
+                },
+                {
+                    key: "ttdPamdal",
+                    label: "pamdal",
+                    required: true,
+                },
             ];
 
         const nextSignatureErrors = {};
-        signatureFields.forEach(({ key, label, required }) => {
-            if (signatureDrafts[key]) {
-                nextSignatureErrors[key] =
-                    `Tanda tangan ${label} sudah digambar tetapi belum disimpan. Tekan Simpan atau Ulang.`;
-            } else if (required && !currentForm[key]) {
-                nextSignatureErrors[key] =
-                    `Tanda tangan ${label} wajib diisi, lalu tekan Simpan.`;
-            }
-        });
 
-        const firstSignatureError = signatureFields.find(({ key }) => nextSignatureErrors[key]);
+        signatureFields.forEach(
+            ({ key, label, required }) => {
+                if (signatureDrafts[key]) {
+                    nextSignatureErrors[key] =
+                        `Tanda tangan ${label} sudah digambar tetapi belum disimpan. Tekan Simpan atau Ulang.`;
+                } else if (required && !currentForm[key]) {
+                    nextSignatureErrors[key] =
+                        `Tanda tangan ${label} wajib diisi, lalu tekan Simpan.`;
+                }
+            }
+        );
+
+        const firstSignatureError = signatureFields.find(
+            ({ key }) => nextSignatureErrors[key]
+        );
+
         if (firstSignatureError) {
             setSignatureErrors(nextSignatureErrors);
-            setError("Lengkapi tanda tangan yang diperlukan.");
+
+            setError(
+                "Lengkapi tanda tangan yang diperlukan."
+            );
+
             document
-                .getElementById(`ttd-${firstSignatureError.key}`)
-                ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                .getElementById(
+                    `ttd-${firstSignatureError.key}`
+                )
+                ?.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                });
+
             return;
         }
+
         setSignatureErrors({});
 
         if (!confirmed) {
-            setError("Centang pernyataan konfirmasi terlebih dahulu.");
+            setError(
+                "Centang pernyataan konfirmasi terlebih dahulu."
+            );
             return;
         }
 
         const payload = {
-            ...(initialReport || {}),
             jenisLaporan: isLost ? "hilang" : "temuan",
             ...currentForm,
-            foto: null,
-            status: initialReport?.status || (isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL),
-            // Status penerimaan barang yang sudah dicatat tidak di-reset saat edit.
+            foto: currentPhoto,
+
+            status: isLost
+                ? STATUS_PUBLISHED
+                : STATUS_WAITING_PAMDAL,
+
             ...(isLost
                 ? {}
-                : { diterimaPamdal: initialReport?.diterimaPamdal || false }),
+                : { diterimaPamdal: false }),
         };
 
         setLoading(true);
-        try {
-            // Foto lama sudah berupa data URL; foto baru perlu dikompres.
-            payload.foto = typeof currentPhoto === "string"
-                ? currentPhoto
-                : await compressPhoto(currentPhoto);
 
-            if (typeof onSubmitReport !== "function") {
-                throw new Error("Fungsi penyimpanan laporan belum terhubung.");
+        try {
+            if (typeof onSubmitReport === "function") {
+                await onSubmitReport(payload);
+            } else {
+                console.log("Pratinjau laporan:", payload);
             }
 
-            await onSubmitReport(payload);
+            // Simpan data untuk digunakan pada pengisian berikutnya.
+            savePreviousFormData(
+                isLost ? "hilang" : "temuan",
+                currentForm
+            );
+
             setSuccess(true);
         } catch (err) {
-            setError(err?.message || "Laporan gagal dikirim. Silakan coba kembali.");
+            setError(
+                err?.message ||
+                "Laporan gagal dikirim. Silakan coba kembali."
+            );
         } finally {
             setLoading(false);
         }
     };
 
-    const renderField = (name, label, placeholder = "", options = {}) => {
+    // Membuat komponen input formulir.
+    const renderField = (
+        name,
+        label,
+        placeholder = "",
+        options = {}
+    ) => {
         const isRequired = Boolean(options.required);
         const value = currentForm[name] ?? "";
 
         return (
-            <div className={`form-group ${options.full ? "form-full" : ""}`} key={name}>
-                <label className="form-label" htmlFor={name}>
+            <div
+                className={`form-group ${options.full ? "form-full" : ""
+                    }`}
+                key={name}
+            >
+                <label
+                    className="form-label"
+                    htmlFor={name}
+                >
                     {label} {isRequired && <span>*</span>}
                 </label>
 
@@ -345,9 +488,15 @@ export default function ReportForm({
                         value={value}
                         onChange={handleInputChange}
                     >
-                        <option value="">Pilih {label.toLowerCase()}</option>
+                        <option value="">
+                            Pilih {label.toLowerCase()}
+                        </option>
+
                         {options.data?.map((item) => (
-                            <option key={item} value={item}>
+                            <option
+                                key={item}
+                                value={item}
+                            >
                                 {item}
                             </option>
                         ))}
@@ -377,9 +526,20 @@ export default function ReportForm({
         );
     };
 
-    const renderSectionHeader = (number, title, description) => (
-        <div className="form-section-heading" key={number}>
-            <span className="section-number">{number}</span>
+    // Membuat judul setiap bagian formulir.
+    const renderSectionHeader = (
+        number,
+        title,
+        description
+    ) => (
+        <div
+            className="form-section-heading"
+            key={number}
+        >
+            <span className="section-number">
+                {number}
+            </span>
+
             <div>
                 <h3>{title}</h3>
                 <p>{description}</p>
@@ -387,38 +547,56 @@ export default function ReportForm({
         </div>
     );
 
+    // Tampilan setelah laporan berhasil dikirim.
     if (success) {
         return (
             <div className="report-page">
                 <section className="report-card report-result">
                     <div className="result-icon">✓</div>
-                    <h2>{isEditing ? "Laporan Berhasil Diperbarui" : "Laporan Berhasil Dikirim"}</h2>
+
+                    <h2>Laporan Berhasil Dikirim</h2>
+
                     <p>
-                        {isEditing
-                            ? "Perubahan laporan kamu berhasil disimpan."
-                            : isLost
-                                ? "Laporan kamu berhasil dicatat ke dalam sistem."
-                                : "Laporan penemuan kamu sudah dicatat, tetapi belum tampil di katalog publik."}
+                        {isLost
+                            ? "Laporan kamu berhasil dicatat ke dalam sistem."
+                            : "Laporan penemuan kamu sudah dicatat, tetapi belum tampil di katalog publik."}
                     </p>
+
                     <div className="result-status">
                         <span>Status laporan</span>
-                        <strong>{initialReport?.status || (isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL)}</strong>
+
+                        <strong>
+                            {isLost
+                                ? STATUS_PUBLISHED
+                                : STATUS_WAITING_PAMDAL}
+                        </strong>
                     </div>
 
                     {!isLost && (
                         <div className="report-notice result-pending-notice">
-                            <strong>Menunggu proses penerimaan barang oleh pamdal</strong>
+                            <strong>
+                                Menunggu proses penerimaan barang oleh pamdal
+                            </strong>
+
                             <p>
                                 Laporan akan dipublikasikan ke katalog setelah barang diterima pamdal.
                                 Langkah selanjutnya:
                             </p>
+
                             <ol className="result-steps">
-                                <li>Serahkan barang yang kamu temukan ke Pos Pamdal.</li>
-                                <li>Pamdal memeriksa barang dan menandai laporan sebagai &quot;barang diterima&quot;.</li>
-                                <li>Setelah itu, laporan otomatis tampil di katalog publik.</li>
+                                <li>
+                                    Serahkan barang yang kamu temukan ke Pos Pamdal.
+                                </li>
+                                <li>
+                                    Pamdal memeriksa barang dan menandai laporan sebagai "barang diterima".
+                                </li>
+                                <li>
+                                    Setelah itu, laporan otomatis tampil di katalog publik.
+                                </li>
                             </ol>
                         </div>
                     )}
+
                     <button
                         type="button"
                         className="btn-submit-gold"
@@ -442,13 +620,16 @@ export default function ReportForm({
                     <button
                         type="button"
                         className="report-back-button"
-                        onClick={isEditing ? onCancelEdit : handleBackToChoices}
-                        disabled={loading}
+                        onClick={handleBackToChoices}
                     >
-                        ← {isEditing ? "Batal Edit" : "Kembali ke Pilihan Borang"}
+                        ← Kembali ke Pilihan Borang
                     </button>
                 )}
-                <h1 style={{ color: "var(--text-main)" }}>Laporan Barang</h1>
+
+                <h1 style={{ color: "var(--text-main)" }}>
+                    Laporan Barang
+                </h1>
+
                 <p>
                     {page === "pilihan"
                         ? "Pilih jenis laporan sesuai kondisi barang."
@@ -459,14 +640,21 @@ export default function ReportForm({
             {page === "pilihan" ? (
                 <section className="report-card">
                     <header className="report-header">
-                        <div className="report-header-icon">▤</div>
+                        <div className="report-header-icon">
+                            ▤
+                        </div>
+
                         <div>
-                            <h2 className="report-form-header-title">Pilih Jenis Laporan</h2>
+                            <h2 className="report-form-header-title">
+                                Pilih Jenis Laporan
+                            </h2>
+
                             <p className="report-form-header-desc">
                                 Apakah kamu kehilangan barang atau menemukan barang?
                             </p>
                         </div>
                     </header>
+
                     <div className="report-form-body">
                         <div className="report-choice-grid">
                             <button
@@ -474,13 +662,29 @@ export default function ReportForm({
                                 className="report-choice-card lost-choice"
                                 onClick={() => {
                                     setPage("hilang");
+                                    setHasPreviousData(
+                                        Boolean(
+                                            getPreviousFormData("hilang")
+                                        )
+                                    );
                                     setError("");
                                 }}
                             >
-                                <span className="report-choice-icon">⌕</span>
-                                <span className="report-choice-title">Borang Berita Acara Kehilangan</span>
-                                <span className="report-choice-description">Untuk melaporkan barang milikmu yang hilang.</span>
-                                <span className="report-choice-link">Buat Laporan Kehilangan →</span>
+                                <span className="report-choice-icon">
+                                    ⌕
+                                </span>
+
+                                <span className="report-choice-title">
+                                    Borang Berita Acara Kehilangan
+                                </span>
+
+                                <span className="report-choice-description">
+                                    Untuk melaporkan barang milikmu yang hilang.
+                                </span>
+
+                                <span className="report-choice-link">
+                                    Buat Laporan Kehilangan →
+                                </span>
                             </button>
 
                             <button
@@ -488,18 +692,41 @@ export default function ReportForm({
                                 className="report-choice-card found-choice"
                                 onClick={() => {
                                     setPage("temuan");
+                                    setHasPreviousData(
+                                        Boolean(
+                                            getPreviousFormData("temuan")
+                                        )
+                                    );
                                     setError("");
                                 }}
                             >
-                                <span className="report-choice-icon">▣</span>
-                                <span className="report-choice-title">Borang Penemuan Barang</span>
-                                <span className="report-choice-description">Untuk melaporkan barang yang kamu temukan.</span>
-                                <span className="report-choice-link">Buat Laporan Penemuan →</span>
+                                <span className="report-choice-icon">
+                                    ▣
+                                </span>
+
+                                <span className="report-choice-title">
+                                    Borang Penemuan Barang
+                                </span>
+
+                                <span className="report-choice-description">
+                                    Untuk melaporkan barang yang kamu temukan.
+                                </span>
+
+                                <span className="report-choice-link">
+                                    Buat Laporan Penemuan →
+                                </span>
                             </button>
                         </div>
 
-                        <div className="report-notice" style={{ maxWidth: "450px", margin: "24px auto 0" }}>
+                        <div
+                            className="report-notice"
+                            style={{
+                                maxWidth: "450px",
+                                margin: "24px auto 0",
+                            }}
+                        >
                             <strong>Perlu diketahui</strong>
+
                             <p>
                                 Data pribadi dan kontak pelapor tidak ditampilkan pada katalog publik.
                                 Pastikan informasi yang kamu masukkan benar.
@@ -510,11 +737,17 @@ export default function ReportForm({
             ) : (
                 <section className="report-card">
                     <header className="report-header">
-                        <div className="report-header-icon">{isLost ? "⌕" : "▣"}</div>
+                        <div className="report-header-icon">
+                            {isLost ? "⌕" : "▣"}
+                        </div>
+
                         <div>
                             <h2 className="report-form-header-title">
-                                {isLost ? "Borang Berita Acara Kehilangan" : "Borang Penemuan Barang"}
+                                {isLost
+                                    ? "Borang Berita Acara Kehilangan"
+                                    : "Borang Penemuan Barang"}
                             </h2>
+
                             <p className="report-form-header-desc">
                                 {isLost
                                     ? "Lengkapi data pelapor dan informasi barang yang hilang."
@@ -524,57 +757,213 @@ export default function ReportForm({
                     </header>
 
                     <div className="report-form-body">
-                        <form onSubmit={handleSubmit} noValidate>
+                        <form
+                            onSubmit={handleSubmit}
+                            noValidate
+                        >
+                            {hasPreviousData && (
+                                <div
+                                    className="report-notice"
+                                    style={{
+                                        marginBottom: "20px",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "space-between",
+                                        gap: "14px",
+                                        flexWrap: "wrap",
+                                    }}
+                                >
+                                    <div>
+                                        <strong>
+                                            Data formulir sebelumnya tersedia
+                                        </strong>
+
+                                        <p style={{ marginBottom: 0 }}>
+                                            Gunakan data sebelumnya agar tidak perlu mengisi ulang. Foto dan tanda tangan harus diisi kembali.
+                                        </p>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="btn-submit-gold"
+                                        onClick={handleUsePreviousData}
+                                        disabled={loading}
+                                    >
+                                        Gunakan Data Sebelumnya
+                                    </button>
+                                </div>
+                            )}
+
                             {renderSectionHeader(
                                 "01",
-                                isLost ? "Data Pelapor" : "Data Penemu",
+                                isLost
+                                    ? "Data Pelapor"
+                                    : "Data Penemu",
                                 "Informasi identitas orang yang membuat laporan."
                             )}
 
                             <div className="form-grid">
-                                {renderField("namaPelapor", "Nama Lengkap", "Masukkan nama lengkap", { required: true })}
-                                {renderField("nomorIdentitas", "NIM / NIK / No. Identitas", "Masukkan nomor identitas", { required: true })}
+                                {renderField(
+                                    "namaPelapor",
+                                    "Nama Lengkap",
+                                    "Masukkan nama lengkap",
+                                    { required: true }
+                                )}
+
+                                {renderField(
+                                    "nomorIdentitas",
+                                    "NIM / NIK / No. Identitas",
+                                    "Masukkan nomor identitas",
+                                    { required: true }
+                                )}
 
                                 {isLost && (
                                     <>
-                                        {renderField("tempatLahir", "Tempat Lahir", "Contoh: Batam")}
-                                        {renderField("tanggalLahir", "Tanggal Lahir", "", { type: "date" })}
-                                        {renderField("agama", "Agama", "", { type: "select", data: RELIGIONS })}
+                                        {renderField(
+                                            "tempatLahir",
+                                            "Tempat Lahir",
+                                            "Contoh: Batam"
+                                        )}
+
+                                        {renderField(
+                                            "tanggalLahir",
+                                            "Tanggal Lahir",
+                                            "",
+                                            { type: "date" }
+                                        )}
+
+                                        {renderField(
+                                            "agama",
+                                            "Agama",
+                                            "",
+                                            {
+                                                type: "select",
+                                                data: RELIGIONS,
+                                            }
+                                        )}
                                     </>
                                 )}
 
-                                {renderField("telepon", "Nomor Telepon", "Nomor yang bisa dihubungi", { required: true })}
+                                {renderField(
+                                    "telepon",
+                                    "Nomor Telepon",
+                                    "Nomor yang bisa dihubungi",
+                                    { required: true }
+                                )}
 
-                                {isLost && renderField("alamat", "Alamat", "Alamat tempat tinggal", { full: true, type: "textarea" })}
+                                {isLost &&
+                                    renderField(
+                                        "alamat",
+                                        "Alamat",
+                                        "Alamat tempat tinggal",
+                                        {
+                                            full: true,
+                                            type: "textarea",
+                                        }
+                                    )}
                             </div>
 
                             {renderSectionHeader(
                                 "02",
-                                isLost ? "Informasi Barang Hilang" : "Informasi Penemuan",
-                                isLost ? "Jelaskan barang yang hilang dan kapan kejadiannya." : "Jelaskan kapan dan di mana barang ditemukan."
+                                isLost
+                                    ? "Informasi Barang Hilang"
+                                    : "Informasi Penemuan",
+                                isLost
+                                    ? "Jelaskan barang yang hilang dan kapan kejadiannya."
+                                    : "Jelaskan kapan dan di mana barang ditemukan."
                             )}
 
                             <div className="form-grid">
-                                {renderField("namaBarang", "Nama Barang", "Contoh: Dompet atau kunci motor", { required: true })}
-                                {renderField("kategori", "Kategori", "", { type: "select", data: CATEGORIES, required: true })}
-                                {renderField("merekModel", "Merek / Model", "Jika diketahui")}
-                                {renderField("warna", "Warna", "Contoh: Hitam")}
-                                {renderField("tanggalKejadian", isLost ? "Tanggal Kehilangan" : "Tanggal Penemuan", "", { type: "date", required: true })}
-                                {renderField("waktuKejadian", "Perkiraan Waktu", "", { type: "time", required: true })}
-                                {renderField("lokasi", isLost ? "Lokasi Kehilangan" : "Lokasi Penemuan", "Contoh: Area parkir gedung A", { full: true, required: true })}
+                                {renderField(
+                                    "namaBarang",
+                                    "Nama Barang",
+                                    "Contoh: Dompet atau kunci motor",
+                                    { required: true }
+                                )}
+
+                                {renderField(
+                                    "kategori",
+                                    "Kategori",
+                                    "",
+                                    {
+                                        type: "select",
+                                        data: CATEGORIES,
+                                        required: true,
+                                    }
+                                )}
+
+                                {renderField(
+                                    "merekModel",
+                                    "Merek / Model",
+                                    "Jika diketahui"
+                                )}
+
+                                {renderField(
+                                    "warna",
+                                    "Warna",
+                                    "Contoh: Hitam"
+                                )}
+
+                                {renderField(
+                                    "tanggalKejadian",
+                                    isLost
+                                        ? "Tanggal Kehilangan"
+                                        : "Tanggal Penemuan",
+                                    "",
+                                    {
+                                        type: "date",
+                                        required: true,
+                                    }
+                                )}
+
+                                {renderField(
+                                    "waktuKejadian",
+                                    "Perkiraan Waktu",
+                                    "",
+                                    {
+                                        type: "time",
+                                        required: true,
+                                    }
+                                )}
+
+                                {renderField(
+                                    "lokasi",
+                                    isLost
+                                        ? "Lokasi Kehilangan"
+                                        : "Lokasi Penemuan",
+                                    "Contoh: Area parkir gedung A",
+                                    {
+                                        full: true,
+                                        required: true,
+                                    }
+                                )}
 
                                 {!isLost &&
-                                    renderField("deskripsi", "Deskripsi Barang", "Jelaskan ciri-ciri barang secara spesifik", {
-                                        full: true,
-                                        type: "textarea",
-                                        required: true,
-                                    })}
+                                    renderField(
+                                        "deskripsi",
+                                        "Deskripsi Barang",
+                                        "Jelaskan ciri-ciri barang secara spesifik",
+                                        {
+                                            full: true,
+                                            type: "textarea",
+                                            required: true,
+                                        }
+                                    )}
 
                                 {renderField(
                                     "kronologi",
-                                    isLost ? "Kronologi Kehilangan" : "Kronologi Penemuan",
-                                    isLost ? "Ceritakan kapan terakhir melihat barang..." : "Ceritakan bagaimana barang ditemukan...",
-                                    { full: true, type: "textarea", required: true, rows: 4 }
+                                    isLost
+                                        ? "Kronologi Kehilangan"
+                                        : "Kronologi Penemuan",
+                                    isLost
+                                        ? "Ceritakan kapan terakhir melihat barang..."
+                                        : "Ceritakan bagaimana barang ditemukan...",
+                                    {
+                                        full: true,
+                                        type: "textarea",
+                                        required: true,
+                                        rows: 4,
+                                    }
                                 )}
 
                                 <div className="form-group form-full">
@@ -583,18 +972,38 @@ export default function ReportForm({
                                     </label>
 
                                     <div
-                                        className="report-upload-area"
+                                        ref={uploadRef}
+                                        className={`report-upload-area${photoError ? " has-error" : ""
+                                            }`}
                                         style={{ cursor: "pointer" }}
-                                        onClick={() => photoInputRef.current?.click()}
+                                        onClick={() =>
+                                            photoInputRef.current?.click()
+                                        }
                                     >
-                                        <span className="upload-symbol">↑</span>
+                                        <span className="upload-symbol">
+                                            ↑
+                                        </span>
+
                                         <strong>
                                             {currentPhoto
-                                                ? (currentPhoto.name || "Foto tersimpan (klik untuk mengganti)")
+                                                ? currentPhoto.name
                                                 : "Klik untuk memilih foto"}
                                         </strong>
-                                        <span>Format gambar, maksimal 5 MB</span>
+
+                                        <span>
+                                            Format gambar, maksimal 5 MB
+                                        </span>
                                     </div>
+
+                                    {photoError && (
+                                        <p
+                                            className="field-error"
+                                            role="alert"
+                                        >
+                                            ⚠️ {photoError}
+                                        </p>
+                                    )}
+
                                     <input
                                         ref={photoInputRef}
                                         type="file"
@@ -607,12 +1016,14 @@ export default function ReportForm({
                                         <button
                                             type="button"
                                             className="remove-photo-button"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
+                                            onClick={(event) => {
+                                                event.stopPropagation();
                                                 setCurrentPhoto(null);
+
                                                 if (photoInputRef.current) {
                                                     photoInputRef.current.value = "";
                                                 }
+
                                                 setError("");
                                             }}
                                         >
@@ -638,36 +1049,77 @@ export default function ReportForm({
                                         label="Tanda Tangan Pelapor"
                                         required
                                         value={currentForm.ttdPelapor}
-                                        onChange={(dataUrl) => handleSignatureChange("ttdPelapor", dataUrl)}
-                                        onDraftChange={(hasDraft) => handleSignatureDraft("ttdPelapor", hasDraft)}
+                                        onChange={(dataUrl) =>
+                                            handleSignatureChange(
+                                                "ttdPelapor",
+                                                dataUrl
+                                            )
+                                        }
+                                        onDraftChange={(hasDraft) =>
+                                            handleSignatureDraft(
+                                                "ttdPelapor",
+                                                hasDraft
+                                            )
+                                        }
                                         error={signatureErrors.ttdPelapor}
                                     />
                                 </div>
 
                                 {isLost ? (
                                     <div className="signature-cell">
-                                        {renderField("namaSaksi", "Nama Saksi (Opsional)", "Nama lengkap saksi")}
+                                        {renderField(
+                                            "namaSaksi",
+                                            "Nama Saksi (Opsional)",
+                                            "Nama lengkap saksi"
+                                        )}
+
                                         <SignaturePad
                                             key={`${page}-ttdSaksi-${resetCount}`}
                                             id="ttd-ttdSaksi"
                                             label="Tanda Tangan Saksi"
                                             value={currentForm.ttdSaksi}
-                                            onChange={(dataUrl) => handleSignatureChange("ttdSaksi", dataUrl)}
-                                            onDraftChange={(hasDraft) => handleSignatureDraft("ttdSaksi", hasDraft)}
+                                            onChange={(dataUrl) =>
+                                                handleSignatureChange(
+                                                    "ttdSaksi",
+                                                    dataUrl
+                                                )
+                                            }
+                                            onDraftChange={(hasDraft) =>
+                                                handleSignatureDraft(
+                                                    "ttdSaksi",
+                                                    hasDraft
+                                                )
+                                            }
                                             error={signatureErrors.ttdSaksi}
                                         />
                                     </div>
                                 ) : (
                                     <div className="signature-cell">
-                                        {renderField("namaPamdal", "Nama Pamdal", "Nama lengkap pamdal", { required: true })}
+                                        {renderField(
+                                            "namaPamdal",
+                                            "Nama Pamdal",
+                                            "Nama lengkap pamdal",
+                                            { required: true }
+                                        )}
+
                                         <SignaturePad
                                             key={`${page}-ttdPamdal-${resetCount}`}
                                             id="ttd-ttdPamdal"
                                             label="Tanda Tangan Pamdal"
                                             required
                                             value={currentForm.ttdPamdal}
-                                            onChange={(dataUrl) => handleSignatureChange("ttdPamdal", dataUrl)}
-                                            onDraftChange={(hasDraft) => handleSignatureDraft("ttdPamdal", hasDraft)}
+                                            onChange={(dataUrl) =>
+                                                handleSignatureChange(
+                                                    "ttdPamdal",
+                                                    dataUrl
+                                                )
+                                            }
+                                            onDraftChange={(hasDraft) =>
+                                                handleSignatureDraft(
+                                                    "ttdPamdal",
+                                                    hasDraft
+                                                )
+                                            }
                                             error={signatureErrors.ttdPamdal}
                                         />
                                     </div>
@@ -676,7 +1128,10 @@ export default function ReportForm({
 
                             {!isLost && (
                                 <div className="report-notice">
-                                    <strong>Barang harus diserahkan ke pamdal</strong>
+                                    <strong>
+                                        Barang harus diserahkan ke pamdal
+                                    </strong>
+
                                     <p>
                                         Setelah laporan dikirim, serahkan barang ke Pos Pamdal. Laporan baru
                                         dipublikasikan ke katalog setelah pamdal menandai barang sebagai diterima.
@@ -685,7 +1140,10 @@ export default function ReportForm({
                             )}
 
                             <div className="report-notice">
-                                <strong>Privasi dan kelengkapan data</strong>
+                                <strong>
+                                    Privasi dan kelengkapan data
+                                </strong>
+
                                 <p>
                                     Informasi pribadi dan nomor telepon tidak ditampilkan pada katalog publik.
                                     Pastikan informasi barang yang kamu laporkan benar dan lengkap.
@@ -696,26 +1154,45 @@ export default function ReportForm({
                                 <input
                                     type="checkbox"
                                     checked={confirmed}
-                                    onChange={(e) => {
-                                        setConfirmed(e.target.checked);
+                                    onChange={(event) => {
+                                        setConfirmed(event.target.checked);
                                         setError("");
                                     }}
                                 />
-                                <span>Saya menyatakan informasi yang diisi benar sesuai pengetahuan saya.</span>
+
+                                <span>
+                                    Saya menyatakan informasi yang diisi benar sesuai pengetahuan saya.
+                                </span>
                             </label>
 
                             {error && (
-                                <div className="report-error" role="alert">
+                                <div
+                                    className="report-error"
+                                    role="alert"
+                                >
                                     ⚠️ {error}
                                 </div>
                             )}
 
                             <div className="report-form-actions">
-                                <button type="button" className="btn-cancel" onClick={handleReset} disabled={loading}>
+                                <button
+                                    type="button"
+                                    className="btn-cancel"
+                                    onClick={handleReset}
+                                    disabled={loading}
+                                >
                                     Reset Formulir
                                 </button>
-                                <button type="button" className="btn-submit-gold" onClick={handleSubmit} disabled={loading}>
-                                    {loading ? "Menyimpan..." : isEditing ? "Simpan Perubahan →" : "Kirim Laporan →"}
+
+                                <button
+                                    type="button"
+                                    className="btn-submit-gold"
+                                    onClick={handleSubmit}
+                                    disabled={loading}
+                                >
+                                    {loading
+                                        ? "Mengirim..."
+                                        : "Kirim Laporan →"}
                                 </button>
                             </div>
                         </form>
