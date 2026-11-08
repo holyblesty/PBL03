@@ -1,18 +1,12 @@
-/**
- * File: ItemDetail.jsx
- * Fungsi: Menampilkan detail barang pada katalog Lost and Found.
-  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
-
- */
-
 import React from "react";
 
+// Menampilkan informasi detail barang yang dipilih dari katalog publik.
 export default function ItemDetail({ item, onBack }) {
     if (!item) return null;
 
-    // Normalisasi data agar pengecekan jenis & status tidak bocor/error
     const jenis = String(item.jenis || item.jenisLaporan || "").toLowerCase();
     const status = String(item.status || "").toLowerCase();
+    const kronologi = item.kronologi || item.kronologiKejadian || "";
 
     const isKehilangan = jenis.includes("hilang") || jenis.includes("kehilangan");
     const isReturned = status.includes("dikembalikan");
@@ -24,7 +18,7 @@ export default function ItemDetail({ item, onBack }) {
                     type="button"
                     className="item-back-button"
                     onClick={onBack}
-                    style={{ marginBottom: "0.5rem" }}
+                    style={{ marginBottom: "8px" }}
                 >
                     ← Kembali
                 </button>
@@ -33,12 +27,11 @@ export default function ItemDetail({ item, onBack }) {
             </div>
 
             <div className="item-detail-card">
-                {/* SISI KIRI: Foto Barang & Badge Jenis (Penemuan / Kehilangan) */}
                 <div className="item-detail-image-section">
                     <div className="item-detail-image-wrapper">
                         <img
                             src={item.foto || item.image || "https://via.placeholder.com/400"}
-                            alt={item.namaBarang}
+                            alt={item.namaBarang || "Foto barang"}
                             className="item-detail-image"
                         />
                         <span className={`item-detail-type ${isKehilangan ? "kehilangan" : "penemuan"}`}>
@@ -47,14 +40,15 @@ export default function ItemDetail({ item, onBack }) {
                     </div>
                 </div>
 
-                {/* SISI KANAN: Konten Detail */}
                 <div className="item-detail-content">
                     <div className="item-detail-title-row">
                         <div>
                             <span className="item-detail-category">{item.kategori || "UMUM"}</span>
-                            <h2>{item.namaBarang}</h2>
+                            <h2>{item.namaBarang || "Nama barang tidak tersedia"}</h2>
                         </div>
-                        <span className="item-detail-status">{item.status || "Dipublikasikan"}</span>
+                        <span className="item-detail-status">
+                            {item.status || "Dipublikasikan"}
+                        </span>
                     </div>
 
                     <div className="item-detail-info-grid">
@@ -63,12 +57,8 @@ export default function ItemDetail({ item, onBack }) {
                             <strong>{item.lokasi || "-"}</strong>
                         </div>
                         <div className="item-info-item">
-                            <span className="item-info-label">📅 Tanggal Laporan</span>
-                            <strong>{item.tanggalKejadian || item.tanggalLaporan || item.tanggal || "-"}</strong>
-                        </div>
-                        <div className="item-info-item">
-                            <span className="item-info-label">📦 Jenis Laporan</span>
-                            <strong>{isKehilangan ? "Kehilangan" : "Penemuan"}</strong>
+                            <span className="item-info-label">📅 Tanggal Kejadian</span>
+                            <strong>{item.tanggalKejadian || item.tanggalLaporan || "-"}</strong>
                         </div>
                     </div>
 
@@ -77,9 +67,13 @@ export default function ItemDetail({ item, onBack }) {
                         <p>{item.deskripsi || "Tidak ada deskripsi tambahan."}</p>
                     </div>
 
-                    {/* ============================================================ */}
-                    {/* BAGIAN INFORMASI STATUS YANG KAMU MINTA (SISTEM PAMDAL)     */}
-                    {/* ============================================================ */}
+                    <div className="item-description-section">
+                        <h3>Kronologi Kejadian</h3>
+                        <p>
+                            {kronologi || "Tidak ada kronologi kejadian yang dicantumkan."}
+                        </p>
+                    </div>
+
                     {!isReturned ? (
                         <div className="item-detail-notice">
                             <div className="item-notice-icon">🔒</div>
@@ -108,7 +102,6 @@ export default function ItemDetail({ item, onBack }) {
                         </div>
                     )}
 
-                    {/* Tombol Aksi */}
                     <div className="item-detail-actions">
                         <button type="button" className="item-back-secondary" onClick={onBack}>
                             Kembali ke Daftar Barang
