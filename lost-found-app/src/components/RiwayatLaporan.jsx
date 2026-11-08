@@ -1,7 +1,7 @@
 /**
  * File: RiwayatLaporan.jsx
- * Fungsi: Menampilkan riwayat laporan milik pengguna beserta filter dan detail laporan.
-  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ * Fungsi: Menampilkan riwayat laporan pengguna, detail laporan, serta aksi edit dan hapus sesuai status laporan.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
  */
 
 import React, { useMemo, useState } from "react";
@@ -30,7 +30,8 @@ const DEFAULT_STATUS_STYLE = {
     border: "#D1D5DB",
 };
 
-export default function RiwayatLaporan({ reports = [] }) {
+export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
+    const myReports = reports;
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [filterStatus, setFilterStatus] = useState("Semua");
     const [searchQuery, setSearchQuery] = useState("");
@@ -41,18 +42,18 @@ export default function RiwayatLaporan({ reports = [] }) {
     const isFinished = (item) =>
         item.status === "Dikembalikan";
 
-    const activeCount = reports.filter(
+    const activeCount = myReports.filter(
         (item) => !isFinished(item)
     ).length;
 
-    const finishedCount = reports.filter(
+    const finishedCount = myReports.filter(
         isFinished
     ).length;
 
     const filteredReports = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
 
-        return reports.filter((item) => {
+        return myReports.filter((item) => {
             const matchesStatus =
                 filterStatus === "Semua" ||
                 (filterStatus === "Aktif" &&
@@ -72,14 +73,12 @@ export default function RiwayatLaporan({ reports = [] }) {
             const matchesSearch =
                 !query ||
                 searchableValues.some((value) =>
-                    String(value ?? "")
-                        .toLowerCase()
-                        .includes(query)
+                    String(value ?? "").toLowerCase().includes(query)
                 );
 
             return matchesStatus && matchesSearch;
         });
-    }, [reports, filterStatus, searchQuery]);
+    }, [myReports, filterStatus, searchQuery]);
 
     // DETAIL LAPORAN
     if (selectedDetail) {
@@ -91,7 +90,7 @@ export default function RiwayatLaporan({ reports = [] }) {
             <div
                 style={{
                     width: "100%",
-                    maxWidth: "56.25rem",
+                    maxWidth: "900px",
                     margin: "0 auto",
                     display: "flex",
                     flexDirection: "column",
@@ -115,11 +114,11 @@ export default function RiwayatLaporan({ reports = [] }) {
                         width: "100%",
                         minWidth: 0,
                         backgroundColor: "#FFFFFF",
-                        borderRadius: "0.75rem",
-                        border: "0.0625rem solid #E5E7EB",
-                        padding: "1.5rem",
+                        borderRadius: "12px",
+                        border: "1px solid #E5E7EB",
+                        padding: "24px",
                         boxShadow:
-                            "0 0.0625rem 0.1875rem rgba(0,0,0,0.04)",
+                            "0 1px 3px rgba(0,0,0,0.04)",
                         textAlign: "left",
                     }}
                 >
@@ -129,15 +128,15 @@ export default function RiwayatLaporan({ reports = [] }) {
                             display: "flex",
                             justifyContent: "space-between",
                             alignItems: "flex-start",
-                            gap: "0.75rem",
+                            gap: "12px",
                             flexWrap: "wrap",
-                            marginBottom: "1.125rem",
+                            marginBottom: "18px",
                         }}
                     >
                         <div>
                             <span
                                 style={{
-                                    fontSize: "0.6875rem",
+                                    fontSize: "11px",
                                     fontWeight: "700",
                                     color: "#6B7280",
                                     textTransform: "uppercase",
@@ -149,10 +148,10 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                             <h2
                                 style={{
-                                    fontSize: "1.375rem",
+                                    fontSize: "22px",
                                     fontWeight: "800",
                                     color: "#1F2937",
-                                    margin: "0.3125rem 0 0",
+                                    margin: "5px 0 0",
                                     overflowWrap: "anywhere",
                                 }}
                             >
@@ -165,9 +164,9 @@ export default function RiwayatLaporan({ reports = [] }) {
                                 display: "inline-block",
                                 backgroundColor: style.bg,
                                 color: style.color,
-                                padding: "0.375rem 0.75rem",
-                                borderRadius: "1.25rem",
-                                fontSize: "0.75rem",
+                                padding: "6px 12px",
+                                borderRadius: "20px",
+                                fontSize: "12px",
                                 fontWeight: "700",
                             }}
                         >
@@ -180,14 +179,14 @@ export default function RiwayatLaporan({ reports = [] }) {
                         style={{
                             display: "grid",
                             gridTemplateColumns:
-                                "repeat(auto-fit, minmax(min(11.25rem, 100%), 1fr))",
-                            gap: "0.75rem",
-                            fontSize: "0.8125rem",
+                                "repeat(auto-fit, minmax(min(180px, 100%), 1fr))",
+                            gap: "12px",
+                            fontSize: "13px",
                             color: "#4B5563",
                             backgroundColor: "#F8FAFC",
-                            padding: "1rem",
-                            borderRadius: "0.5rem",
-                            marginBottom: "1.125rem",
+                            padding: "16px",
+                            borderRadius: "8px",
+                            marginBottom: "18px",
                         }}
                     >
                         <div>
@@ -216,15 +215,15 @@ export default function RiwayatLaporan({ reports = [] }) {
                     {/* DESKRIPSI */}
                     <div
                         style={{
-                            marginBottom: "1.125rem",
+                            marginBottom: "18px",
                         }}
                     >
                         <h4
                             style={{
-                                fontSize: "0.875rem",
+                                fontSize: "14px",
                                 fontWeight: "700",
                                 color: "#1F2937",
-                                margin: "0 0 0.375rem",
+                                margin: "0 0 6px",
                             }}
                         >
                             Deskripsi Barang
@@ -232,7 +231,7 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                         <p
                             style={{
-                                fontSize: "0.8125rem",
+                                fontSize: "13px",
                                 color: "#4B5563",
                                 margin: 0,
                                 lineHeight: 1.6,
@@ -246,15 +245,15 @@ export default function RiwayatLaporan({ reports = [] }) {
                     {/* INFORMASI STATUS */}
                     <div
                         style={{
-                            marginBottom: "1.25rem",
+                            marginBottom: "20px",
                             backgroundColor: style.bg,
                             color: style.color,
-                            padding: "0.75rem 0.875rem",
-                            borderRadius: "0.5rem",
-                            fontSize: "0.8125rem",
+                            padding: "12px 14px",
+                            borderRadius: "8px",
+                            fontSize: "13px",
                             lineHeight: 1.6,
                             borderLeft:
-                                `0.25rem solid ${style.border} `,
+                                `4px solid ${style.border} `,
                             overflowWrap: "anywhere",
                         }}
                     >
@@ -266,16 +265,16 @@ export default function RiwayatLaporan({ reports = [] }) {
                     {/* STATUS PENYELESAIAN */}
                     <div
                         style={{
-                            borderTop: "0.0625rem solid #E5E7EB",
-                            paddingTop: "1.125rem",
+                            borderTop: "1px solid #E5E7EB",
+                            paddingTop: "18px",
                         }}
                     >
                         <h4
                             style={{
-                                fontSize: "0.9375rem",
+                                fontSize: "15px",
                                 fontWeight: "700",
                                 color: "#1F2937",
-                                margin: "0 0 0.625rem",
+                                margin: "0 0 10px",
                             }}
                         >
                             ℹ️ Status Penyelesaian
@@ -283,11 +282,11 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                         <div
                             style={{
-                                padding: "1rem",
+                                padding: "16px",
                                 backgroundColor: "#F8FAFC",
-                                borderRadius: "0.5rem",
-                                border: "0.0625rem solid #E5E7EB",
-                                fontSize: "0.8125rem",
+                                borderRadius: "8px",
+                                border: "1px solid #E5E7EB",
+                                fontSize: "13px",
                                 color: "#4B5563",
                                 lineHeight: 1.6,
                             }}
@@ -301,7 +300,7 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                                     <p
                                         style={{
-                                            margin: "0.25rem 0 0",
+                                            margin: "4px 0 0",
                                         }}
                                     >
                                         Terima kasih atas laporan
@@ -334,7 +333,7 @@ export default function RiwayatLaporan({ reports = [] }) {
         <div
             style={{
                 width: "100%",
-                maxWidth: "56.25rem",
+                maxWidth: "900px",
                 margin: "0 auto",
                 textAlign: "left",
             }}
@@ -342,16 +341,16 @@ export default function RiwayatLaporan({ reports = [] }) {
             {/* HEADER */}
             <header
                 style={{
-                    marginBottom: "1.375rem",
+                    marginBottom: "22px",
                     textAlign: "left",
                 }}
             >
                 <h2
                     style={{
-                        fontSize: "1.5rem",
+                        fontSize: "24px",
                         fontWeight: "800",
                         color: "var(--text-main, #1F2937)",
-                        margin: "0 0 0.375rem",
+                        margin: "0 0 6px",
                     }}
                 >
                     Riwayat Laporan
@@ -359,7 +358,7 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                 <p
                     style={{
-                        fontSize: "0.875rem",
+                        fontSize: "14px",
                         color: "var(--text-muted, #6B7280)",
                         margin: 0,
                         lineHeight: 1.5,
@@ -376,15 +375,15 @@ export default function RiwayatLaporan({ reports = [] }) {
                 style={{
                     display: "grid",
                     gridTemplateColumns:
-                        "repeat(auto-fit, minmax(8.125rem, 1fr))",
-                    gap: "0.75rem",
-                    marginBottom: "1.25rem",
+                        "repeat(auto-fit, minmax(130px, 1fr))",
+                    gap: "12px",
+                    marginBottom: "20px",
                 }}
             >
                 {[
                     {
                         label: "Semua Laporan",
-                        value: reports.length,
+                        value: myReports.length,
                         key: "Semua",
                     },
                     {
@@ -412,12 +411,12 @@ export default function RiwayatLaporan({ reports = [] }) {
                             width: "100%",
                             minWidth: 0,
                             textAlign: "left",
-                            padding: "1rem",
-                            borderRadius: "0.625rem",
+                            padding: "16px",
+                            borderRadius: "10px",
                             border:
                                 filterStatus === summary.key
-                                    ? "0.125rem solid #F59E0B"
-                                    : "0.0625rem solid #E5E7EB",
+                                    ? "2px solid #F59E0B"
+                                    : "1px solid #E5E7EB",
                             backgroundColor: "#FFFFFF",
                             cursor: "pointer",
                             fontFamily: "inherit",
@@ -425,7 +424,7 @@ export default function RiwayatLaporan({ reports = [] }) {
                     >
                         <div
                             style={{
-                                fontSize: "1.5rem",
+                                fontSize: "24px",
                                 fontWeight: "800",
                                 color: "#1F2937",
                             }}
@@ -435,9 +434,9 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                         <div
                             style={{
-                                fontSize: "0.75rem",
+                                fontSize: "12px",
                                 color: "#6B7280",
-                                marginTop: "0.25rem",
+                                marginTop: "4px",
                             }}
                         >
                             {summary.label}
@@ -450,9 +449,9 @@ export default function RiwayatLaporan({ reports = [] }) {
             <div
                 style={{
                     display: "flex",
-                    gap: "0.75rem",
+                    gap: "12px",
                     flexWrap: "wrap",
-                    marginBottom: "1.125rem",
+                    marginBottom: "18px",
                     alignItems: "center",
                 }}
             >
@@ -466,7 +465,7 @@ export default function RiwayatLaporan({ reports = [] }) {
                     placeholder="Cari nama, kategori, atau lokasi..."
                     aria-label="Cari laporan"
                     style={{
-                        flex: "1 1 15rem",
+                        flex: "1 1 240px",
                         minWidth: 0,
                         backgroundColor: "#FFFFFF",
                         color: "#111827",
@@ -482,7 +481,7 @@ export default function RiwayatLaporan({ reports = [] }) {
                     className="form-select"
                     style={{
                         width: "auto",
-                        minWidth: "9.375rem",
+                        minWidth: "150px",
                     }}
                 >
                     <option value="Semua">
@@ -499,7 +498,7 @@ export default function RiwayatLaporan({ reports = [] }) {
                     style={{
                         display: "flex",
                         flexDirection: "column",
-                        gap: "0.875rem",
+                        gap: "14px",
                     }}
                 >
                     {filteredReports.map((item) => {
@@ -514,13 +513,13 @@ export default function RiwayatLaporan({ reports = [] }) {
                                     width: "100%",
                                     minWidth: 0,
                                     backgroundColor: "#FFFFFF",
-                                    borderRadius: "0.75rem",
-                                    border: "0.0625rem solid #E5E7EB",
-                                    padding: "1.125rem",
+                                    borderRadius: "12px",
+                                    border: "1px solid #E5E7EB",
+                                    padding: "18px",
                                     boxShadow:
-                                        "0 0.0625rem 0.1875rem rgba(0,0,0,0.04)",
+                                        "0 1px 3px rgba(0,0,0,0.04)",
                                     borderLeft:
-                                        `0.3125rem solid ${style.border} `,
+                                        `5px solid ${style.border} `,
                                 }}
                             >
                                 {/* JUDUL DAN STATUS */}
@@ -529,9 +528,9 @@ export default function RiwayatLaporan({ reports = [] }) {
                                         display: "flex",
                                         justifyContent: "space-between",
                                         alignItems: "flex-start",
-                                        gap: "0.75rem",
+                                        gap: "12px",
                                         flexWrap: "wrap",
-                                        marginBottom: "0.625rem",
+                                        marginBottom: "10px",
                                     }}
                                 >
                                     <div
@@ -542,18 +541,18 @@ export default function RiwayatLaporan({ reports = [] }) {
                                         <div
                                             style={{
                                                 display: "flex",
-                                                gap: "0.5rem",
+                                                gap: "8px",
                                                 alignItems: "center",
                                                 flexWrap: "wrap",
-                                                marginBottom: "0.3125rem",
+                                                marginBottom: "5px",
                                             }}
                                         >
                                             <span
                                                 style={{
-                                                    fontSize: "0.625rem",
+                                                    fontSize: "10px",
                                                     fontWeight: "700",
-                                                    padding: "0.25rem 0.4375rem",
-                                                    borderRadius: "0.25rem",
+                                                    padding: "4px 7px",
+                                                    borderRadius: "4px",
                                                     backgroundColor:
                                                         item.jenis ===
                                                             "Kehilangan"
@@ -571,7 +570,7 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                                             <span
                                                 style={{
-                                                    fontSize: "0.6875rem",
+                                                    fontSize: "11px",
                                                     color: "#6B7280",
                                                 }}
                                             >
@@ -581,7 +580,7 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                                         <h3
                                             style={{
-                                                fontSize: "1.0625rem",
+                                                fontSize: "17px",
                                                 fontWeight: "700",
                                                 color: "#1F2937",
                                                 margin: 0,
@@ -597,9 +596,9 @@ export default function RiwayatLaporan({ reports = [] }) {
                                             flexShrink: 0,
                                             backgroundColor: style.bg,
                                             color: style.color,
-                                            padding: "0.3125rem 0.625rem",
-                                            borderRadius: "1.25rem",
-                                            fontSize: "0.6875rem",
+                                            padding: "5px 10px",
+                                            borderRadius: "20px",
+                                            fontSize: "11px",
                                             fontWeight: "700",
                                         }}
                                     >
@@ -611,11 +610,11 @@ export default function RiwayatLaporan({ reports = [] }) {
                                 <div
                                     style={{
                                         display: "flex",
-                                        gap: "0.5rem 1.125rem",
+                                        gap: "8px 18px",
                                         flexWrap: "wrap",
-                                        fontSize: "0.75rem",
+                                        fontSize: "12px",
                                         color: "#4B5563",
-                                        marginBottom: "0.75rem",
+                                        marginBottom: "12px",
                                     }}
                                 >
                                     <span>
@@ -633,26 +632,64 @@ export default function RiwayatLaporan({ reports = [] }) {
 
                                 <p
                                     style={{
-                                        fontSize: "0.8125rem",
+                                        fontSize: "13px",
                                         color: "#4B5563",
                                         lineHeight: 1.55,
-                                        margin: "0 0 0.75rem",
+                                        margin: "0 0 12px",
                                     }}
                                 >
                                     {item.pesanPamdal ||
                                         `Status laporan: ${item.status}.`}
                                 </p>
 
-                                {/* TOMBOL DETAIL */}
+                                {/* AKSI LAPORAN */}
                                 <div
                                     style={{
                                         display: "flex",
                                         justifyContent: "flex-end",
                                         borderTop:
-                                            "0.0625rem solid #F3F4F6",
-                                        paddingTop: "0.75rem",
+                                            "1px solid #F3F4F6",
+                                        paddingTop: "12px",
                                     }}
                                 >
+                                    {item.status === "Menunggu Penerimaan Barang" && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() => onEdit?.(item)}
+                                                style={{
+                                                    padding: "9px 13px",
+                                                    backgroundColor: "#FBBF24",
+                                                    color: "#111827",
+                                                    border: "none",
+                                                    borderRadius: "7px",
+                                                    fontFamily: "inherit",
+                                                    fontSize: "12px",
+                                                    fontWeight: "700",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => onDelete?.(item.id)}
+                                                style={{
+                                                    padding: "9px 13px",
+                                                    backgroundColor: "#FEE2E2",
+                                                    color: "#B91C1C",
+                                                    border: "none",
+                                                    borderRadius: "7px",
+                                                    fontFamily: "inherit",
+                                                    fontSize: "12px",
+                                                    fontWeight: "700",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Hapus
+                                            </button>
+                                        </>
+                                    )}
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -662,13 +699,13 @@ export default function RiwayatLaporan({ reports = [] }) {
                                             display: "inline-flex",
                                             alignItems: "center",
                                             justifyContent: "center",
-                                            padding: "0.5625rem 0.8125rem",
+                                            padding: "9px 13px",
                                             backgroundColor: "#2563EB",
                                             color: "#FFFFFF",
                                             border: "none",
-                                            borderRadius: "0.4375rem",
+                                            borderRadius: "7px",
                                             fontFamily: "inherit",
-                                            fontSize: "0.75rem",
+                                            fontSize: "12px",
                                             fontWeight: "600",
                                             cursor: "pointer",
                                         }}
@@ -684,16 +721,16 @@ export default function RiwayatLaporan({ reports = [] }) {
                 <div
                     style={{
                         textAlign: "center",
-                        padding: "2.25rem 1.25rem",
+                        padding: "36px 20px",
                         backgroundColor: "#FFFFFF",
-                        borderRadius: "0.75rem",
-                        border: "0.0625rem solid #E5E7EB",
+                        borderRadius: "12px",
+                        border: "1px solid #E5E7EB",
                         color: "#6B7280",
                     }}
                 >
                     <p
                         style={{
-                            margin: "0 0 0.375rem",
+                            margin: "0 0 6px",
                             fontWeight: "700",
                             color: "#374151",
                         }}
@@ -704,7 +741,7 @@ export default function RiwayatLaporan({ reports = [] }) {
                     <p
                         style={{
                             margin: 0,
-                            fontSize: "0.8125rem",
+                            fontSize: "13px",
                         }}
                     >
                         Coba ubah filter status atau kata kunci
@@ -713,6 +750,20 @@ export default function RiwayatLaporan({ reports = [] }) {
                 </div>
             )}
 
+            {/* CATATAN DATA */}
+            <p
+                style={{
+                    marginTop: "18px",
+                    fontSize: "11px",
+                    color: "#9CA3AF",
+                    lineHeight: 1.5,
+                }}
+            >
+                Catatan: halaman ini masih menggunakan data
+                dummy. Setelah backend terhubung, data akan
+                diambil dari laporan milik pengguna yang sedang
+                login.
+            </p>
         </div>
     );
 }
