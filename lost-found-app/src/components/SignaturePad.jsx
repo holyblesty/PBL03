@@ -1,3 +1,9 @@
+/**
+ * File: SignaturePad.jsx
+ * Fungsi: Menyediakan kolom tanda tangan digital menggunakan mouse atau layar sentuh.
+  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React, { useEffect, useRef, useState } from "react";
 import SignaturePadLib from "signature_pad";
 

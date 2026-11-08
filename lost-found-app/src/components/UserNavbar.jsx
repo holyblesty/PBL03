@@ -1,45 +1,27 @@
+/**
+ * File: UserNavbar.jsx
+ * Fungsi: Menampilkan navigasi atas, profil pengguna, dan panel notifikasi.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React, { useState } from 'react';
 
 export default function UserNavbar() {
     const [showNotifications, setShowNotifications] = useState(false);
-    const [hasNewNotif, setHasNewNotif] = useState(true);
-
-    const [notifications, setNotifications] = useState([
-        {
-            id: 1,
-            text: 'Jadwal request pengambilan barang "Tumbler Corkcicle" telah diterima dan dikonfirmasi oleh Pamdal.',
-            time: '5 menit lalu',
-            unread: true
-        },
-        {
-            id: 2,
-            text: 'Pengajuan klaim kepemilikan barang "Dompet Hitam Kulit" telah di-ACC oleh admin/Pamdal.',
-            time: '2 jam lalu',
-            unread: true
-        },
-        {
-            id: 3,
-            text: 'Laporan barang hilang baru Anda telah di-ACC dan dipublikasikan oleh Pamdal.',
-            time: '1 hari lalu',
-            unread: false
-        },
-    ]);
 
     const handleOpenNotifications = () => {
-        setShowNotifications(!showNotifications);
-        setHasNewNotif(false);
-        setNotifications(notifications.map(n => ({ ...n, unread: false })));
+        setShowNotifications((previous) => !previous);
     };
 
     return (
         <header style={{
-            height: '70px',
+            height: '4.375rem',
             backgroundColor: '#FFFFFF',
-            borderBottom: '1px solid #E5E7EB',
+            borderBottom: '0.0625rem solid #E5E7EB',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'flex-end', // Diubah jadi flex-end karena search bar-nya dihilangkan
-            padding: '0 24px',
+            padding: '0 1.5rem',
             boxSizing: 'border-box',
             position: 'relative',
             fontFamily: 'system-ui, -apple-system, sans-serif',
@@ -47,7 +29,7 @@ export default function UserNavbar() {
         }}>
 
             {/* Bagian Kanan: Notifikasi & Profil */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
 
                 {/* Tombol Lonceng Notifikasi Vektor SVG */}
                 <div style={{ position: 'relative' }}>
@@ -55,10 +37,10 @@ export default function UserNavbar() {
                         onClick={handleOpenNotifications}
                         style={{
                             background: 'none',
-                            border: '1px solid #E5E7EB',
+                            border: '0.0625rem solid #E5E7EB',
                             cursor: 'pointer',
                             position: 'relative',
-                            padding: '8px',
+                            padding: '0.5rem',
                             borderRadius: '50%',
                             display: 'flex',
                             alignItems: 'center',
@@ -75,56 +57,37 @@ export default function UserNavbar() {
                             <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                         </svg>
 
-                        {/* Badge Lingkaran Notifikasi Merah Terang */}
-                        {hasNewNotif && (
-                            <span style={{
-                                position: 'absolute',
-                                top: '4px',
-                                right: '4px',
-                                width: '9px',
-                                height: '9px',
-                                backgroundColor: '#DC2626',
-                                borderRadius: '50%',
-                                border: '2px solid #FFFFFF'
-                            }}></span>
-                        )}
                     </button>
 
                     {/* Dropdown Box Notifikasi */}
                     {showNotifications && (
-                        <div style={{ position: 'absolute', right: '0', top: '50px', width: '340px', backgroundColor: '#FFFFFF', border: '1px solid #E5E7EB', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05)', zIndex: 100, padding: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', borderBottom: '1px solid #F1F5F9', paddingBottom: '10px' }}>
-                                <span style={{ fontSize: '14px', fontWeight: '700', color: '#111827' }}>Notifikasi</span>
-                                <span style={{ fontSize: '11px', color: '#64748B', fontWeight: '500' }}>Semua telah dibaca</span>
+                        <div style={{ position: 'absolute', right: '0', top: '3.125rem', width: '21.25rem', backgroundColor: '#FFFFFF', border: '0.0625rem solid #E5E7EB', borderRadius: '0.75rem', boxShadow: '0 0.625rem 0.9375rem -0.1875rem rgba(0,0,0,0.05), 0 0.25rem 0.375rem -0.125rem rgba(0,0,0,0.05)', zIndex: 100, padding: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', borderBottom: '0.0625rem solid #F1F5F9', paddingBottom: '0.625rem' }}>
+                                <span style={{ fontSize: '0.875rem', fontWeight: '700', color: '#111827' }}>Notifikasi</span>
                             </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '300px', overflowY: 'auto' }}>
-                                {notifications.map((notif) => (
-                                    <div key={notif.id} style={{ padding: '12px', borderRadius: '8px', backgroundColor: '#F8FAFC', border: '1px solid #E2E8F0', transition: 'all 0.15s ease' }}>
-                                        <p style={{ margin: '0 0 6px 0', fontSize: '12.5px', color: '#1F2937', fontWeight: '500', lineHeight: '1.4' }}>{notif.text}</p>
-                                        <span style={{ fontSize: '10.5px', color: '#64748B', fontWeight: '500' }}>{notif.time}</span>
-                                    </div>
-                                ))}
+                            <div style={{ padding: '1.5rem 0.75rem', textAlign: 'center', color: '#64748B', fontSize: '0.75rem' }}>
+                                Belum ada notifikasi.
                             </div>
                         </div>
                     )}
                 </div>
 
                 {/* Pembatas Vertikal */}
-                <div style={{ width: '1px', height: '24px', backgroundColor: '#E5E7EB' }}></div>
+                <div style={{ width: '0.0625rem', height: '1.5rem', backgroundColor: '#E5E7EB' }}></div>
 
                 {/* Profil Pengguna */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
                     <div style={{ textAlign: 'right' }}>
-                        <p style={{ margin: 0, fontSize: '14px', fontWeight: '750', color: '#111827' }}>
+                        <p style={{ margin: 0, fontSize: '0.875rem', fontWeight: '750', color: '#111827' }}>
                             Civitas Kampus
                         </p>
-                        <p style={{ margin: 0, fontSize: '11px', fontWeight: '600', color: '#64748B' }}>
+                        <p style={{ margin: 0, fontSize: '0.6875rem', fontWeight: '600', color: '#64748B' }}>
                             Portal Pengguna
                         </p>
                     </div>
                     <div style={{
-                        width: '38px',
-                        height: '38px',
+                        width: '2.375rem',
+                        height: '2.375rem',
                         borderRadius: '50%',
                         backgroundColor: '#111827',
                         color: '#FBBF24',
@@ -132,8 +95,8 @@ export default function UserNavbar() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: '700',
-                        fontSize: '14px',
-                        border: '2px solid #E5E7EB'
+                        fontSize: '0.875rem',
+                        border: '0.125rem solid #E5E7EB'
                     }}>
                         CK
                     </div>

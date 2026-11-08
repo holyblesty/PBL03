@@ -1,3 +1,10 @@
+/**
+ * File: ItemDetail.jsx
+ * Fungsi: Menampilkan detail barang pada katalog Lost and Found.
+  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+
+ */
+
 import React from "react";
 
 export default function ItemDetail({ item, onBack }) {
@@ -17,7 +24,7 @@ export default function ItemDetail({ item, onBack }) {
                     type="button"
                     className="item-back-button"
                     onClick={onBack}
-                    style={{ marginBottom: "8px" }}
+                    style={{ marginBottom: "0.5rem" }}
                 >
                     ← Kembali
                 </button>
@@ -57,15 +64,11 @@ export default function ItemDetail({ item, onBack }) {
                         </div>
                         <div className="item-info-item">
                             <span className="item-info-label">📅 Tanggal Laporan</span>
-                            <strong>{item.tanggalKejadian || item.tanggalLaporan || "-"}</strong>
+                            <strong>{item.tanggalKejadian || item.tanggalLaporan || item.tanggal || "-"}</strong>
                         </div>
                         <div className="item-info-item">
-                            <span className="item-info-label">👤 Pelapor</span>
-                            <strong>{item.namaPelapor || item.pelapor || "Tidak diketahui"}</strong>
-                        </div>
-                        <div className="item-info-item">
-                            <span className="item-info-label">🏷️ Kategori</span>
-                            <strong>{item.kategori || "-"}</strong>
+                            <span className="item-info-label">📦 Jenis Laporan</span>
+                            <strong>{isKehilangan ? "Kehilangan" : "Penemuan"}</strong>
                         </div>
                     </div>
 

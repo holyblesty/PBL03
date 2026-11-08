@@ -1,3 +1,9 @@
+/**
+ * File: ReportForm.jsx
+ * Fungsi: Menangani formulir laporan kehilangan dan penemuan, validasi, tanda tangan, serta pengiriman laporan.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React, { useRef, useState } from "react";
 import SignaturePad from "./SignaturePad";
 
@@ -63,9 +69,44 @@ const MAX_PHOTO_SIZE = 5 * 1024 * 1024;
 
 // Alur laporan penemuan: barang diserahkan ke pamdal dulu, baru dipublikasikan.
 const STATUS_PUBLISHED = "Dipublikasikan";
-const STATUS_WAITING_PAMDAL = "Menunggu Penerimaan Pamdal";
+const STATUS_WAITING_PAMDAL = "Menunggu Penerimaan Barang";
 
-export default function ReportForm({ onBack, onSubmitReport }) {
+const compressPhoto = (file) =>
+    new Promise((resolve, reject) => {
+        if (!file) {
+            resolve(null);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = () => {
+            const image = new Image();
+            image.onload = () => {
+                const maxDimension = 1200;
+                const scale = Math.min(1, maxDimension / Math.max(image.width, image.height));
+                const canvas = document.createElement("canvas");
+                canvas.width = Math.max(1, Math.round(image.width * scale));
+                canvas.height = Math.max(1, Math.round(image.height * scale));
+
+                const context = canvas.getContext("2d");
+                if (!context) {
+                    reject(new Error("Foto tidak dapat diproses."));
+                    return;
+                }
+
+                context.fillStyle = "#FFFFFF";
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                resolve(canvas.toDataURL("image/jpeg", 0.75));
+            };
+            image.onerror = () => reject(new Error("Foto tidak dapat dibaca."));
+            image.src = reader.result;
+        };
+        reader.onerror = () => reject(new Error("Foto gagal dibaca."));
+        reader.readAsDataURL(file);
+    });
+
+export default function ReportForm({ onSubmitReport }) {
     const [page, setPage] = useState("pilihan");
     const [lostForm, setLostForm] = useState({ ...INITIAL_LOST_FORM });
     const [foundForm, setFoundForm] = useState({ ...INITIAL_FOUND_FORM });
@@ -75,12 +116,9 @@ export default function ReportForm({ onBack, onSubmitReport }) {
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
     const [confirmed, setConfirmed] = useState(false);
-    const [photoError, setPhotoError] = useState("");
     const [signatureErrors, setSignatureErrors] = useState({});
     const [signatureDrafts, setSignatureDrafts] = useState({});
     const [resetCount, setResetCount] = useState(0);
-    const uploadRef = useRef(null);
-
     const photoInputRef = useRef(null);
 
     const isLost = page === "hilang";
@@ -116,7 +154,6 @@ export default function ReportForm({ onBack, onSubmitReport }) {
         }
 
         setCurrentPhoto(file);
-        setPhotoError("");
         setError("");
     };
 
@@ -148,7 +185,6 @@ export default function ReportForm({ onBack, onSubmitReport }) {
             photoInputRef.current.value = "";
         }
         setConfirmed(false);
-        setPhotoError("");
         setSignatureErrors({});
         setSignatureDrafts({});
         setResetCount((count) => count + 1);
@@ -156,23 +192,16 @@ export default function ReportForm({ onBack, onSubmitReport }) {
     };
 
     const handleBackToChoices = () => {
-        setPhotoError("");
         setSignatureErrors({});
         setPage("pilihan");
         setError("");
     };
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event?.preventDefault();
         setError("");
 
-        setPhotoError("");
 
-        if (!isLost && !currentPhoto) {
-            setPhotoError("Foto barang temuan wajib diunggah.");
-            uploadRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-            return;
-        }
 
         const requiredFields = isLost
             ? [
@@ -249,7 +278,7 @@ export default function ReportForm({ onBack, onSubmitReport }) {
         const payload = {
             jenisLaporan: isLost ? "hilang" : "temuan",
             ...currentForm,
-            foto: currentPhoto,
+            foto: null,
             status: isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL,
             // Laporan penemuan baru tampil di katalog setelah pamdal mencentang "barang diterima".
             ...(isLost ? {} : { diterimaPamdal: false }),
@@ -257,11 +286,13 @@ export default function ReportForm({ onBack, onSubmitReport }) {
 
         setLoading(true);
         try {
-            if (typeof onSubmitReport === "function") {
-                onSubmitReport(payload);
-            } else {
-                console.log("Pratinjau laporan:", payload);
+            payload.foto = await compressPhoto(currentPhoto);
+
+            if (typeof onSubmitReport !== "function") {
+                throw new Error("Fungsi penyimpanan laporan belum terhubung.");
             }
+
+            await onSubmitReport(payload);
             setSuccess(true);
         } catch (err) {
             setError(err?.message || "Laporan gagal dikirim. Silakan coba kembali.");
@@ -434,7 +465,7 @@ export default function ReportForm({ onBack, onSubmitReport }) {
                             </button>
                         </div>
 
-                        <div className="report-notice" style={{ maxWidth: "450px", margin: "24px auto 0" }}>
+                        <div className="report-notice" style={{ maxWidth: "28.125rem", margin: "1.5rem auto 0" }}>
                             <strong>Perlu diketahui</strong>
                             <p>
                                 Data pribadi dan kontak pelapor tidak ditampilkan pada katalog publik.
@@ -515,12 +546,11 @@ export default function ReportForm({ onBack, onSubmitReport }) {
 
                                 <div className="form-group form-full">
                                     <label className="form-label">
-                                        Foto Barang {isLost ? "(Opsional)" : "*"}
+                                        Foto Barang (Opsional)
                                     </label>
 
                                     <div
-                                        ref={uploadRef}
-                                        className={`report-upload-area${photoError ? " has-error" : ""}`}
+                                        className="report-upload-area"
                                         style={{ cursor: "pointer" }}
                                         onClick={() => photoInputRef.current?.click()}
                                     >
@@ -530,13 +560,6 @@ export default function ReportForm({ onBack, onSubmitReport }) {
                                         </strong>
                                         <span>Format gambar, maksimal 5 MB</span>
                                     </div>
-
-                                    {photoError && (
-                                        <p className="field-error" role="alert">
-                                            ⚠️ {photoError}
-                                        </p>
-                                    )}
-
                                     <input
                                         ref={photoInputRef}
                                         type="file"

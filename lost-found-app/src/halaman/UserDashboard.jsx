@@ -1,3 +1,9 @@
+/**
+ * File: UserDashboard.jsx
+ * Fungsi: Mengelola dashboard pengguna, katalog barang, penyimpanan laporan lokal, dan navigasi halaman.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React, { useState } from 'react';
 import UserSidebar from "../components/UserSidebar";
 import UserNavbar from "../components/UserNavbar";
@@ -76,40 +82,80 @@ const DUMMY_REPORTS = [
     }
 ];
 
-const KATEGORI_OPTIONS = [
-    'Dompet',
-    'Botol Minum',
-    'Kunci',
-    'Elektronik',
-    'Pakaian',
-    'Aksesoris'
-];
+const REPORTS_STORAGE_KEY = "lost_found_user_reports";
 
-const LOKASI_OPTIONS = [
-    'Kantin',
-    'Mushola',
-    'Parkiran',
-    'Gedung Utama',
-    'Gedung TA',
-    'Smoking Area',
-    'Gedung Techno'
-];
+const loadUserReports = () => {
+    if (typeof window === 'undefined') return [];
+
+    try {
+        const savedReports = window.localStorage.getItem(REPORTS_STORAGE_KEY);
+        const parsedReports = savedReports ? JSON.parse(savedReports) : [];
+        return Array.isArray(parsedReports) ? parsedReports : [];
+    } catch {
+        return [];
+    }
+};
 
 export default function UserDashboard() {
     const [activeTab, setActiveTab] = useState('dashboard');
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
+    const [userReports, setUserReports] = useState(loadUserReports);
 
     const [searchQuery, setSearchQuery] = useState('');
     const [filterJenis, setFilterJenis] = useState('Semua');
     const [filterKategori, setFilterKategori] = useState('');
     const [filterLokasi, setFilterLokasi] = useState('');
 
-    // Katalog hanya menampilkan laporan yang sudah dipublikasikan
-    // (laporan penemuan yang masih menunggu pamdal tidak ikut tampil).
-    const activeReports = DUMMY_REPORTS.filter(
+    // Gabungkan data contoh katalog dengan laporan yang disimpan pengguna.
+    // Laporan penemuan yang menunggu penerimaan Pamdal tidak ditampilkan di katalog.
+    const allReports = [...userReports, ...DUMMY_REPORTS];
+    const activeReports = allReports.filter(
         item => item.status === 'Dipublikasikan'
     );
+
+    const kategoriOptions = [...new Set(
+        allReports.map(item => item.kategori).filter(Boolean)
+    )];
+
+    const lokasiOptions = [...new Set(
+        allReports.map(item => item.lokasi).filter(Boolean)
+    )];
+
+    const handleSubmitReport = (payload) => {
+        // Hanya simpan data barang yang diperlukan untuk katalog dan riwayat.
+        // Data identitas, kontak, alamat, saksi, dan tanda tangan tidak disimpan di localStorage.
+        const report = {
+            id: Date.now(),
+            namaBarang: payload.namaBarang,
+            jenis: payload.jenisLaporan === 'hilang' ? 'Kehilangan' : 'Penemuan',
+            kategori: payload.kategori,
+            lokasi: payload.lokasi,
+            tanggal: payload.tanggalKejadian,
+            tanggalKejadian: payload.tanggalKejadian,
+            status: payload.status,
+            foto: payload.foto || '',
+            deskripsi: [
+                payload.merekModel,
+                payload.warna,
+                payload.deskripsi || `Laporan dibuat pada ${payload.tanggalKejadian}.`,
+            ].filter(Boolean).join(' • '),
+            pesanPamdal: payload.status === 'Dipublikasikan'
+                ? 'Laporan kehilangan telah dipublikasikan pada katalog.'
+                : 'Menunggu barang diserahkan dan diterima oleh Pamdal di Pos Pamdal.',
+            tanggalSelesai: null,
+        };
+
+        const updatedReports = [report, ...userReports];
+
+        try {
+            window.localStorage.setItem(REPORTS_STORAGE_KEY, JSON.stringify(updatedReports));
+        } catch {
+            throw new Error('Penyimpanan browser penuh atau tidak tersedia. Coba gunakan foto yang lebih kecil atau kosongkan penyimpanan browser.');
+        }
+
+        setUserReports(updatedReports);
+    };
 
     const filteredReports = activeReports.filter(item => {
         const keyword = searchQuery.trim().toLowerCase();
@@ -158,33 +204,23 @@ export default function UserDashboard() {
                 <ItemDetail
                     item={selectedItem}
                     onBack={() => setSelectedItem(null)}
-                    onClaim={(item) => {
-                        alert(
-                            `Demo: pengajuan klaim "${item.namaBarang}". ` +
-                            'Integrasi penyimpanan klaim belum tersedia.'
-                        );
-                    }}
                 />
             );
         }
 
         if (activeTab === 'laporan') {
-            return <ReportForm />;
+            return <ReportForm onSubmitReport={handleSubmitReport} />;
         }
 
         if (activeTab === 'riwayat-laporan') {
-            return <RiwayatLaporan />;
-        }
-
-        if (activeTab === 'riwayat') {
-            return <RiwayatSelesai />;
+            return <RiwayatLaporan reports={userReports} />;
         }
 
         return (
             <>
                 <div
                     className="user-catalog-header"
-                    style={{ marginBottom: '24px' }}
+                    style={{ marginBottom: '1.5rem' }}
                 >
                     <h1>Daftar Barang Hilang & Temuan</h1>
                     <p>
@@ -196,19 +232,19 @@ export default function UserDashboard() {
                 {/* PANEL PENCARIAN DAN FILTER */}
                 <div style={{
                     backgroundColor: '#FFFFFF',
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '12px',
-                    padding: '20px',
-                    marginBottom: '20px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+                    border: '0.0625rem solid #E5E7EB',
+                    borderRadius: '0.75rem',
+                    padding: '1.25rem',
+                    marginBottom: '1.25rem',
+                    boxShadow: '0 0.0625rem 0.1875rem rgba(0,0,0,0.04)'
                 }}>
-                    <div style={{ marginBottom: '16px' }}>
+                    <div style={{ marginBottom: '1rem' }}>
                         <label style={{
                             display: 'block',
-                            fontSize: '13px',
+                            fontSize: '0.8125rem',
                             fontWeight: '600',
                             color: '#374151',
-                            marginBottom: '7px'
+                            marginBottom: '0.4375rem'
                         }}>
                             Cari Barang
                         </label>
@@ -247,16 +283,16 @@ export default function UserDashboard() {
 
                     <div style={{
                         display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '12px'
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(12.5rem, 1fr))',
+                        gap: '0.75rem'
                     }}>
                         <div>
                             <label style={{
                                 display: 'block',
-                                fontSize: '13px',
+                                fontSize: '0.8125rem',
                                 fontWeight: '600',
                                 color: '#374151',
-                                marginBottom: '7px'
+                                marginBottom: '0.4375rem'
                             }}>
                                 Kategori
                             </label>
@@ -264,10 +300,10 @@ export default function UserDashboard() {
                             <select
                                 value={filterKategori}
                                 onChange={e => setFilterKategori(e.target.value)}
-                                style={selectStyle}
+                                style={SELECT_STYLE}
                             >
                                 <option value="">Semua Kategori</option>
-                                {KATEGORI_OPTIONS.map(kategori => (
+                                {kategoriOptions.map(kategori => (
                                     <option key={kategori} value={kategori}>
                                         {kategori}
                                     </option>
@@ -278,10 +314,10 @@ export default function UserDashboard() {
                         <div>
                             <label style={{
                                 display: 'block',
-                                fontSize: '13px',
+                                fontSize: '0.8125rem',
                                 fontWeight: '600',
                                 color: '#374151',
-                                marginBottom: '7px'
+                                marginBottom: '0.4375rem'
                             }}>
                                 Area Lokasi
                             </label>
@@ -289,10 +325,10 @@ export default function UserDashboard() {
                             <select
                                 value={filterLokasi}
                                 onChange={e => setFilterLokasi(e.target.value)}
-                                style={selectStyle}
+                                style={SELECT_STYLE}
                             >
                                 <option value="">Semua Area Lokasi</option>
-                                {LOKASI_OPTIONS.map(lokasi => (
+                                {lokasiOptions.map(lokasi => (
                                     <option key={lokasi} value={lokasi}>
                                         {lokasi}
                                     </option>
@@ -307,7 +343,7 @@ export default function UserDashboard() {
                             <button
                                 onClick={resetFilters}
                                 style={{
-                                    ...selectStyle,
+                                    ...SELECT_STYLE,
                                     fontWeight: '600',
                                     cursor: 'pointer'
                                 }}
@@ -321,12 +357,12 @@ export default function UserDashboard() {
                 {/* TAB JENIS LAPORAN */}
                 <div style={{
                     backgroundColor: '#FFFFFF',
-                    borderBottom: '1px solid #E5E7EB',
-                    marginBottom: '20px'
+                    borderBottom: '0.0625rem solid #E5E7EB',
+                    marginBottom: '1.25rem'
                 }}>
                     <div style={{
                         display: 'flex',
-                        gap: '25px',
+                        gap: '1.5625rem',
                         overflowX: 'auto'
                     }}>
                         {[
@@ -338,11 +374,11 @@ export default function UserDashboard() {
                                 key={tab.value}
                                 onClick={() => setFilterJenis(tab.value)}
                                 style={{
-                                    padding: '12px 4px',
+                                    padding: '0.75rem 0.25rem',
                                     border: 'none',
                                     borderBottom: filterJenis === tab.value
-                                        ? '2px solid #2563EB'
-                                        : '2px solid transparent',
+                                        ? '0.125rem solid #2563EB'
+                                        : '0.125rem solid transparent',
                                     backgroundColor: 'transparent',
                                     color: filterJenis === tab.value
                                         ? '#2563EB'
@@ -363,11 +399,11 @@ export default function UserDashboard() {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '16px'
+                    marginBottom: '1rem'
                 }}>
                     <p style={{
                         margin: 0,
-                        fontSize: '13px',
+                        fontSize: '0.8125rem',
                         color: '#6B7280'
                     }}>
                         Menampilkan{' '}
@@ -381,9 +417,9 @@ export default function UserDashboard() {
                 {/* KATALOG BARANG AKTIF */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                    gap: '20px',
-                    marginBottom: '24px'
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(17.5rem, 1fr))',
+                    gap: '1.25rem',
+                    marginBottom: '1.5rem'
                 }}>
                     {filteredReports.length > 0 ? (
                         filteredReports.map(item => {
@@ -394,22 +430,22 @@ export default function UserDashboard() {
                                     key={item.id}
                                     style={{
                                         backgroundColor: '#FFFFFF',
-                                        borderRadius: '12px',
-                                        border: '1px solid #E5E7EB',
+                                        borderRadius: '0.75rem',
+                                        border: '0.0625rem solid #E5E7EB',
                                         overflow: 'hidden',
-                                        boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                                        boxShadow: '0 0.0625rem 0.1875rem rgba(0,0,0,0.05)',
                                         display: 'flex',
                                         flexDirection: 'column'
                                     }}
                                 >
                                     <div style={{
                                         position: 'relative',
-                                        height: '180px',
+                                        height: '11.25rem',
                                         backgroundColor: '#F3F4F6',
                                         overflow: 'hidden'
                                     }}>
                                         <img
-                                            src={item.foto}
+                                            src={item.foto || "https://via.placeholder.com/500?text=Foto+Tidak+Tersedia"}
                                             alt={item.namaBarang}
                                             style={{
                                                 width: '100%',
@@ -420,17 +456,17 @@ export default function UserDashboard() {
 
                                         <span style={{
                                             position: 'absolute',
-                                            top: '12px',
-                                            right: '12px',
+                                            top: '0.75rem',
+                                            right: '0.75rem',
                                             backgroundColor: isKehilangan
                                                 ? '#FEF3C7'
                                                 : '#D1FAE5',
                                             color: isKehilangan
                                                 ? '#D97706'
                                                 : '#059669',
-                                            padding: '5px 10px',
-                                            borderRadius: '20px',
-                                            fontSize: '11px',
+                                            padding: '0.3125rem 0.625rem',
+                                            borderRadius: '1.25rem',
+                                            fontSize: '0.6875rem',
                                             fontWeight: '700'
                                         }}>
                                             {item.jenis}
@@ -438,30 +474,30 @@ export default function UserDashboard() {
                                     </div>
 
                                     <div style={{
-                                        padding: '16px',
+                                        padding: '1rem',
                                         flex: 1
                                     }}>
                                         <h3 style={{
-                                            fontSize: '16px',
+                                            fontSize: '1rem',
                                             fontWeight: '700',
                                             color: '#1F2937',
-                                            margin: '0 0 8px 0'
+                                            margin: '0 0 0.5rem 0'
                                         }}>
                                             {item.namaBarang}
                                         </h3>
 
-                                        <div style={metaStyle}>
+                                        <div style={META_STYLE}>
                                             🏷️ {item.kategori}
                                         </div>
-                                        <div style={metaStyle}>
+                                        <div style={META_STYLE}>
                                             📍 {item.lokasi}
                                         </div>
-                                        <div style={metaStyle}>
+                                        <div style={META_STYLE}>
                                             📅 {item.tanggal}
                                         </div>
 
                                         <p style={{
-                                            fontSize: '13px',
+                                            fontSize: '0.8125rem',
                                             color: '#6B7280',
                                             lineHeight: '1.5',
                                             display: '-webkit-box',
@@ -474,17 +510,17 @@ export default function UserDashboard() {
                                         </p>
                                     </div>
 
-                                    <div style={{ padding: '0 16px 16px' }}>
+                                    <div style={{ padding: '0 1rem 1rem' }}>
                                         <button
                                             onClick={() => setSelectedItem(item)}
                                             style={{
                                                 width: '100%',
-                                                padding: '10px 14px',
+                                                padding: '0.625rem 0.875rem',
                                                 backgroundColor: '#2563EB',
                                                 color: '#FFFFFF',
                                                 border: 'none',
-                                                borderRadius: '7px',
-                                                fontSize: '12px',
+                                                borderRadius: '0.4375rem',
+                                                fontSize: '0.75rem',
                                                 fontWeight: '600',
                                                 cursor: 'pointer'
                                             }}
@@ -499,26 +535,26 @@ export default function UserDashboard() {
                         <div style={{
                             gridColumn: '1 / -1',
                             textAlign: 'center',
-                            padding: '50px 20px',
+                            padding: '3.125rem 1.25rem',
                             backgroundColor: '#FFFFFF',
-                            borderRadius: '12px',
-                            border: '1px solid #E5E7EB',
+                            borderRadius: '0.75rem',
+                            border: '0.0625rem solid #E5E7EB',
                             color: '#6B7280'
                         }}>
                             <div style={{
-                                fontSize: '35px',
-                                marginBottom: '10px'
+                                fontSize: '2.1875rem',
+                                marginBottom: '0.625rem'
                             }}>
                                 🔍
                             </div>
                             <h3 style={{
-                                margin: '0 0 6px',
+                                margin: '0 0 0.375rem',
                                 color: '#374151',
-                                fontSize: '16px'
+                                fontSize: '1rem'
                             }}>
                                 Barang tidak ditemukan
                             </h3>
-                            <p style={{ margin: 0, fontSize: '13px' }}>
+                            <p style={{ margin: 0, fontSize: '0.8125rem' }}>
                                 Coba ubah kata kunci atau filter pencarian.
                             </p>
                         </div>
@@ -563,7 +599,7 @@ export default function UserDashboard() {
 
                 <div
                     className="dashboard-content"
-                    style={{ padding: '24px', flex: 1 }}
+                    style={{ padding: '1.5rem', flex: 1 }}
                 >
                     {renderMainContent()}
                 </div>
@@ -572,19 +608,19 @@ export default function UserDashboard() {
     );
 }
 
-const selectStyle = {
+const SELECT_STYLE = {
     width: '100%',
-    padding: '10px 12px',
-    borderRadius: '7px',
-    border: '1px solid #D1D5DB',
+    padding: '0.625rem 0.75rem',
+    borderRadius: '0.4375rem',
+    border: '0.0625rem solid #D1D5DB',
     backgroundColor: '#FFFFFF',
     color: '#374151',
-    fontSize: '13px',
+    fontSize: '0.8125rem',
     outline: 'none'
 };
 
-const metaStyle = {
-    fontSize: '12px',
+const META_STYLE = {
+    fontSize: '0.75rem',
     color: '#6B7280',
-    marginBottom: '7px'
+    marginBottom: '0.4375rem'
 };
