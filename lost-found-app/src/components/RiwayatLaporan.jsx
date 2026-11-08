@@ -30,8 +30,27 @@ const DEFAULT_STATUS_STYLE = {
     border: "#D1D5DB",
 };
 
-export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
-    const myReports = reports;
+const getReportType = (item) => {
+    const type = String(
+        item?.jenisLaporan || item?.jenis || ""
+    ).toLowerCase();
+
+    if (type === "hilang" || type === "kehilangan") {
+        return "Kehilangan";
+    }
+
+    if (type === "temuan" || type === "penemuan") {
+        return "Penemuan";
+    }
+
+    return "";
+};
+
+export default function RiwayatLaporan({
+    reports = [],
+    onEdit,
+    onDelete,
+}) {
     const [selectedDetail, setSelectedDetail] = useState(null);
     const [filterStatus, setFilterStatus] = useState("Semua");
     const [searchQuery, setSearchQuery] = useState("");
@@ -42,18 +61,33 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
     const isFinished = (item) =>
         item.status === "Dikembalikan";
 
-    const activeCount = myReports.filter(
+    const canEditOrDelete = (item) => {
+        if (isFinished(item)) return false;
+
+        const jenis = getReportType(item);
+
+        if (jenis === "Kehilangan") {
+            return true;
+        }
+
+        return (
+            jenis === "Penemuan" &&
+            item.status === "Menunggu Penerimaan Barang"
+        );
+    };
+
+    const activeCount = reports.filter(
         (item) => !isFinished(item)
     ).length;
 
-    const finishedCount = myReports.filter(
+    const finishedCount = reports.filter(
         isFinished
     ).length;
 
     const filteredReports = useMemo(() => {
         const query = searchQuery.trim().toLowerCase();
 
-        return myReports.filter((item) => {
+        return reports.filter((item) => {
             const matchesStatus =
                 filterStatus === "Semua" ||
                 (filterStatus === "Aktif" &&
@@ -63,7 +97,7 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
 
             const searchableValues = [
                 item.namaBarang,
-                item.jenis,
+                getReportType(item),
                 item.kategori,
                 item.lokasi,
                 item.deskripsi,
@@ -73,12 +107,14 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
             const matchesSearch =
                 !query ||
                 searchableValues.some((value) =>
-                    String(value ?? "").toLowerCase().includes(query)
+                    String(value ?? "")
+                        .toLowerCase()
+                        .includes(query)
                 );
 
             return matchesStatus && matchesSearch;
         });
-    }, [myReports, filterStatus, searchQuery]);
+    }, [reports, filterStatus, searchQuery]);
 
     // DETAIL LAPORAN
     if (selectedDetail) {
@@ -142,7 +178,7 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                     textTransform: "uppercase",
                                 }}
                             >
-                                {selectedDetail.jenis} ·
+                                {getReportType(selectedDetail)} ·
                                 {" "}Laporan #{selectedDetail.id}
                             </span>
 
@@ -201,7 +237,8 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
 
                         <div>
                             📅 <strong>Tanggal kejadian:</strong>{" "}
-                            {selectedDetail.tanggalKejadian}
+                            {selectedDetail.tanggalKejadian ||
+                                selectedDetail.tanggal}
                         </div>
 
                         {selectedDetail.tanggalSelesai && (
@@ -211,6 +248,43 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                             </div>
                         )}
                     </div>
+
+                    {/* FOTO BARANG */}
+                    {(selectedDetail.buktiFoto ||
+                        selectedDetail.foto) && (
+                            <div
+                                style={{
+                                    marginBottom: "18px",
+                                }}
+                            >
+                                <h4
+                                    style={{
+                                        fontSize: "14px",
+                                        fontWeight: "700",
+                                        color: "#1F2937",
+                                        margin: "0 0 8px",
+                                    }}
+                                >
+                                    Foto Barang
+                                </h4>
+
+                                <img
+                                    src={
+                                        selectedDetail.buktiFoto ||
+                                        selectedDetail.foto
+                                    }
+                                    alt={selectedDetail.namaBarang}
+                                    style={{
+                                        width: "100%",
+                                        maxWidth: "320px",
+                                        maxHeight: "260px",
+                                        objectFit: "cover",
+                                        borderRadius: "8px",
+                                        border: "1px solid #E5E7EB",
+                                    }}
+                                />
+                            </div>
+                        )}
 
                     {/* DESKRIPSI */}
                     <div
@@ -238,7 +312,8 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                 overflowWrap: "anywhere",
                             }}
                         >
-                            {selectedDetail.deskripsi}
+                            {selectedDetail.deskripsi ||
+                                "Tidak ada deskripsi barang."}
                         </p>
                     </div>
 
@@ -253,7 +328,7 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                             fontSize: "13px",
                             lineHeight: 1.6,
                             borderLeft:
-                                `4px solid ${style.border} `,
+                                `4px solid ${style.border}`,
                             overflowWrap: "anywhere",
                         }}
                     >
@@ -383,7 +458,7 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                 {[
                     {
                         label: "Semua Laporan",
-                        value: myReports.length,
+                        value: reports.length,
                         key: "Semua",
                     },
                     {
@@ -502,9 +577,9 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                     }}
                 >
                     {filteredReports.map((item) => {
-                        const style = getStatusStyle(
-                            item.status
-                        );
+                        const style = getStatusStyle(item.status);
+                        const showEditDelete =
+                            canEditOrDelete(item);
 
                         return (
                             <article
@@ -519,7 +594,7 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                     boxShadow:
                                         "0 1px 3px rgba(0,0,0,0.04)",
                                     borderLeft:
-                                        `5px solid ${style.border} `,
+                                        `5px solid ${style.border}`,
                                 }}
                             >
                                 {/* JUDUL DAN STATUS */}
@@ -554,18 +629,18 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                                     padding: "4px 7px",
                                                     borderRadius: "4px",
                                                     backgroundColor:
-                                                        item.jenis ===
+                                                        getReportType(item) ===
                                                             "Kehilangan"
                                                             ? "#FEF3C7"
                                                             : "#D1FAE5",
                                                     color:
-                                                        item.jenis ===
+                                                        getReportType(item) ===
                                                             "Kehilangan"
                                                             ? "#92400E"
                                                             : "#065F46",
                                                 }}
                                             >
-                                                {item.jenis}
+                                                {getReportType(item)}
                                             </span>
 
                                             <span
@@ -626,7 +701,8 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                     </span>
 
                                     <span>
-                                        📅 {item.tanggalKejadian}
+                                        📅 {item.tanggalKejadian ||
+                                            item.tanggal}
                                     </span>
                                 </div>
 
@@ -642,58 +718,62 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                         `Status laporan: ${item.status}.`}
                                 </p>
 
-                                {/* AKSI LAPORAN */}
+                                {/* TOMBOL AKSI */}
                                 <div
                                     style={{
                                         display: "flex",
                                         justifyContent: "flex-end",
+                                        gap: "8px",
+                                        flexWrap: "wrap",
                                         borderTop:
                                             "1px solid #F3F4F6",
                                         paddingTop: "12px",
                                     }}
                                 >
-                                    {(String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "kehilangan" ||
-                                        String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "hilang" ||
-                                        ((String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "penemuan" ||
-                                            String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "temuan") &&
-                                            item.status === "Menunggu Penerimaan Barang")) && (
-                                            <>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onEdit?.(item)}
-                                                    style={{
-                                                        padding: "9px 13px",
-                                                        backgroundColor: "#FBBF24",
-                                                        color: "#111827",
-                                                        border: "none",
-                                                        borderRadius: "7px",
-                                                        fontFamily: "inherit",
-                                                        fontSize: "12px",
-                                                        fontWeight: "700",
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    Edit
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => onDelete?.(item.id)}
-                                                    style={{
-                                                        padding: "9px 13px",
-                                                        backgroundColor: "#FEE2E2",
-                                                        color: "#B91C1C",
-                                                        border: "none",
-                                                        borderRadius: "7px",
-                                                        fontFamily: "inherit",
-                                                        fontSize: "12px",
-                                                        fontWeight: "700",
-                                                        cursor: "pointer",
-                                                    }}
-                                                >
-                                                    Hapus
-                                                </button>
-                                            </>
-                                        )}
+                                    {showEditDelete && (
+                                        <>
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    onEdit?.(item)
+                                                }
+                                                style={{
+                                                    padding: "9px 13px",
+                                                    backgroundColor: "#FBBF24",
+                                                    color: "#111827",
+                                                    border: "none",
+                                                    borderRadius: "7px",
+                                                    fontFamily: "inherit",
+                                                    fontSize: "12px",
+                                                    fontWeight: "700",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Edit
+                                            </button>
+
+                                            <button
+                                                type="button"
+                                                onClick={() =>
+                                                    onDelete?.(item.id)
+                                                }
+                                                style={{
+                                                    padding: "9px 13px",
+                                                    backgroundColor: "#FEE2E2",
+                                                    color: "#B91C1C",
+                                                    border: "none",
+                                                    borderRadius: "7px",
+                                                    fontFamily: "inherit",
+                                                    fontSize: "12px",
+                                                    fontWeight: "700",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                Hapus
+                                            </button>
+                                        </>
+                                    )}
+
                                     <button
                                         type="button"
                                         onClick={() =>
@@ -753,21 +833,6 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                     </p>
                 </div>
             )}
-
-            {/* CATATAN DATA */}
-            <p
-                style={{
-                    marginTop: "18px",
-                    fontSize: "11px",
-                    color: "#9CA3AF",
-                    lineHeight: 1.5,
-                }}
-            >
-                Catatan: halaman ini masih menggunakan data
-                dummy. Setelah backend terhubung, data akan
-                diambil dari laporan milik pengguna yang sedang
-                login.
-            </p>
         </div>
     );
 }
