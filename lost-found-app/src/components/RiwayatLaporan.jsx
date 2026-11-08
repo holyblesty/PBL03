@@ -652,44 +652,48 @@ export default function RiwayatLaporan({ reports = [], onEdit, onDelete }) {
                                         paddingTop: "12px",
                                     }}
                                 >
-                                    {item.status === "Menunggu Penerimaan Barang" && (
-                                        <>
-                                            <button
-                                                type="button"
-                                                onClick={() => onEdit?.(item)}
-                                                style={{
-                                                    padding: "9px 13px",
-                                                    backgroundColor: "#FBBF24",
-                                                    color: "#111827",
-                                                    border: "none",
-                                                    borderRadius: "7px",
-                                                    fontFamily: "inherit",
-                                                    fontSize: "12px",
-                                                    fontWeight: "700",
-                                                    cursor: "pointer",
-                                                }}
-                                            >
-                                                Edit
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => onDelete?.(item.id)}
-                                                style={{
-                                                    padding: "9px 13px",
-                                                    backgroundColor: "#FEE2E2",
-                                                    color: "#B91C1C",
-                                                    border: "none",
-                                                    borderRadius: "7px",
-                                                    fontFamily: "inherit",
-                                                    fontSize: "12px",
-                                                    fontWeight: "700",
-                                                    cursor: "pointer",
-                                                }}
-                                            >
-                                                Hapus
-                                            </button>
-                                        </>
-                                    )}
+                                    {(String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "kehilangan" ||
+                                        String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "hilang" ||
+                                        ((String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "penemuan" ||
+                                            String(item.jenis || item.jenisLaporan || "").trim().toLowerCase() === "temuan") &&
+                                            item.status === "Menunggu Penerimaan Barang")) && (
+                                            <>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onEdit?.(item)}
+                                                    style={{
+                                                        padding: "9px 13px",
+                                                        backgroundColor: "#FBBF24",
+                                                        color: "#111827",
+                                                        border: "none",
+                                                        borderRadius: "7px",
+                                                        fontFamily: "inherit",
+                                                        fontSize: "12px",
+                                                        fontWeight: "700",
+                                                        cursor: "pointer",
+                                                    }}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onDelete?.(item.id)}
+                                                    style={{
+                                                        padding: "9px 13px",
+                                                        backgroundColor: "#FEE2E2",
+                                                        color: "#B91C1C",
+                                                        border: "none",
+                                                        borderRadius: "7px",
+                                                        fontFamily: "inherit",
+                                                        fontSize: "12px",
+                                                        fontWeight: "700",
+                                                        cursor: "pointer",
+                                                    }}
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </>
+                                        )}
                                     <button
                                         type="button"
                                         onClick={() =>

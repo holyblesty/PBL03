@@ -103,8 +103,22 @@ const LOKASI_OPTIONS = [
 
 const EDITABLE_REPORT_STATUS = "Menunggu Penerimaan Barang";
 
-const isReportEditable = (report) =>
-    report?.status === EDITABLE_REPORT_STATUS;
+const isReportEditable = (report) => {
+    const jenisLaporan = String(
+        report?.jenisLaporan || report?.jenis || ""
+    ).trim().toLowerCase();
+    const status = String(report?.status || "").trim().toLowerCase();
+
+    const isKehilangan = ["hilang", "kehilangan"].includes(jenisLaporan);
+    const isPenemuan = ["temuan", "penemuan"].includes(jenisLaporan);
+
+    // Laporan kehilangan tetap dapat dikelola oleh pelapor.
+    // Laporan penemuan hanya dapat dikelola sebelum diterima Pamdal.
+    return (
+        isKehilangan ||
+        (isPenemuan && status === EDITABLE_REPORT_STATUS.toLowerCase())
+    );
+};
 
 const REPORTS_STORAGE_KEY = "lost_found_user_reports";
 
