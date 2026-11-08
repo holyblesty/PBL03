@@ -1,6 +1,6 @@
 /**
  * File: ReportForm.jsx
- * Fungsi: Menangani formulir laporan kehilangan dan penemuan, validasi, tanda tangan, serta pengiriman laporan.
+ * Fungsi: Menyediakan formulir pelaporan kehilangan dan penemuan barang, termasuk validasi data, unggah foto, tanda tangan digital, serta pengiriman dan pengeditan laporan.
  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
  */
 
@@ -106,16 +106,36 @@ const compressPhoto = (file) =>
         reader.readAsDataURL(file);
     });
 
-export default function ReportForm({ onSubmitReport }) {
-    const [page, setPage] = useState("pilihan");
-    const [lostForm, setLostForm] = useState({ ...INITIAL_LOST_FORM });
-    const [foundForm, setFoundForm] = useState({ ...INITIAL_FOUND_FORM });
-    const [lostPhoto, setLostPhoto] = useState(null);
-    const [foundPhoto, setFoundPhoto] = useState(null);
+export default function ReportForm({
+    initialReport = null,
+    onSubmitReport,
+    onCancelEdit,
+}) {
+    const isEditing = Boolean(initialReport);
+    const isInitialLostReport = initialReport?.jenisLaporan === "hilang";
+    const [page, setPage] = useState(() =>
+        initialReport ? (isInitialLostReport ? "hilang" : "temuan") : "pilihan"
+    );
+    const [lostForm, setLostForm] = useState(() =>
+        isInitialLostReport
+            ? { ...INITIAL_LOST_FORM, ...initialReport }
+            : { ...INITIAL_LOST_FORM }
+    );
+    const [foundForm, setFoundForm] = useState(() =>
+        initialReport && !isInitialLostReport
+            ? { ...INITIAL_FOUND_FORM, ...initialReport }
+            : { ...INITIAL_FOUND_FORM }
+    );
+    const [lostPhoto, setLostPhoto] = useState(() =>
+        isInitialLostReport ? initialReport?.foto || null : null
+    );
+    const [foundPhoto, setFoundPhoto] = useState(() =>
+        initialReport && !isInitialLostReport ? initialReport?.foto || null : null
+    );
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [confirmed, setConfirmed] = useState(false);
+    const [confirmed, setConfirmed] = useState(Boolean(initialReport));
     const [signatureErrors, setSignatureErrors] = useState({});
     const [signatureDrafts, setSignatureDrafts] = useState({});
     const [resetCount, setResetCount] = useState(0);
@@ -276,17 +296,23 @@ export default function ReportForm({ onSubmitReport }) {
         }
 
         const payload = {
+            ...(initialReport || {}),
             jenisLaporan: isLost ? "hilang" : "temuan",
             ...currentForm,
             foto: null,
-            status: isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL,
-            // Laporan penemuan baru tampil di katalog setelah pamdal mencentang "barang diterima".
-            ...(isLost ? {} : { diterimaPamdal: false }),
+            status: initialReport?.status || (isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL),
+            // Status penerimaan barang yang sudah dicatat tidak di-reset saat edit.
+            ...(isLost
+                ? {}
+                : { diterimaPamdal: initialReport?.diterimaPamdal || false }),
         };
 
         setLoading(true);
         try {
-            payload.foto = await compressPhoto(currentPhoto);
+            // Foto lama sudah berupa data URL; foto baru perlu dikompres.
+            payload.foto = typeof currentPhoto === "string"
+                ? currentPhoto
+                : await compressPhoto(currentPhoto);
 
             if (typeof onSubmitReport !== "function") {
                 throw new Error("Fungsi penyimpanan laporan belum terhubung.");
@@ -366,15 +392,17 @@ export default function ReportForm({ onSubmitReport }) {
             <div className="report-page">
                 <section className="report-card report-result">
                     <div className="result-icon">✓</div>
-                    <h2>Laporan Berhasil Dikirim</h2>
+                    <h2>{isEditing ? "Laporan Berhasil Diperbarui" : "Laporan Berhasil Dikirim"}</h2>
                     <p>
-                        {isLost
-                            ? "Laporan kamu berhasil dicatat ke dalam sistem."
-                            : "Laporan penemuan kamu sudah dicatat, tetapi belum tampil di katalog publik."}
+                        {isEditing
+                            ? "Perubahan laporan kamu berhasil disimpan."
+                            : isLost
+                                ? "Laporan kamu berhasil dicatat ke dalam sistem."
+                                : "Laporan penemuan kamu sudah dicatat, tetapi belum tampil di katalog publik."}
                     </p>
                     <div className="result-status">
                         <span>Status laporan</span>
-                        <strong>{isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL}</strong>
+                        <strong>{initialReport?.status || (isLost ? STATUS_PUBLISHED : STATUS_WAITING_PAMDAL)}</strong>
                     </div>
 
                     {!isLost && (
@@ -411,8 +439,13 @@ export default function ReportForm({ onSubmitReport }) {
         <div className="report-page">
             <div className="report-page-heading">
                 {page !== "pilihan" && (
-                    <button type="button" className="report-back-button" onClick={handleBackToChoices}>
-                        ← Kembali ke Pilihan Borang
+                    <button
+                        type="button"
+                        className="report-back-button"
+                        onClick={isEditing ? onCancelEdit : handleBackToChoices}
+                        disabled={loading}
+                    >
+                        ← {isEditing ? "Batal Edit" : "Kembali ke Pilihan Borang"}
                     </button>
                 )}
                 <h1 style={{ color: "var(--text-main)" }}>Laporan Barang</h1>
@@ -465,7 +498,7 @@ export default function ReportForm({ onSubmitReport }) {
                             </button>
                         </div>
 
-                        <div className="report-notice" style={{ maxWidth: "28.125rem", margin: "1.5rem auto 0" }}>
+                        <div className="report-notice" style={{ maxWidth: "450px", margin: "24px auto 0" }}>
                             <strong>Perlu diketahui</strong>
                             <p>
                                 Data pribadi dan kontak pelapor tidak ditampilkan pada katalog publik.
@@ -556,7 +589,9 @@ export default function ReportForm({ onSubmitReport }) {
                                     >
                                         <span className="upload-symbol">↑</span>
                                         <strong>
-                                            {currentPhoto ? currentPhoto.name : "Klik untuk memilih foto"}
+                                            {currentPhoto
+                                                ? (currentPhoto.name || "Foto tersimpan (klik untuk mengganti)")
+                                                : "Klik untuk memilih foto"}
                                         </strong>
                                         <span>Format gambar, maksimal 5 MB</span>
                                     </div>
@@ -680,7 +715,7 @@ export default function ReportForm({ onSubmitReport }) {
                                     Reset Formulir
                                 </button>
                                 <button type="button" className="btn-submit-gold" onClick={handleSubmit} disabled={loading}>
-                                    {loading ? "Mengirim..." : "Kirim Laporan →"}
+                                    {loading ? "Menyimpan..." : isEditing ? "Simpan Perubahan →" : "Kirim Laporan →"}
                                 </button>
                             </div>
                         </form>
