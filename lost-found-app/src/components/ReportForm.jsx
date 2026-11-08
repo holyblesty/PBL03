@@ -23,6 +23,8 @@ const INITIAL_LOST_FORM = {
     tanggalKejadian: "",
     waktuKejadian: "",
     lokasi: "",
+    ruangan: "",
+    detailLokasi: "",
     kronologi: "",
     ttdPelapor: null,
     namaSaksi: "",
@@ -40,6 +42,8 @@ const INITIAL_FOUND_FORM = {
     tanggalKejadian: "",
     waktuKejadian: "",
     lokasi: "",
+    ruangan: "",
+    detailLokasi: "",
     deskripsi: "",
     kronologi: "",
     ttdPelapor: null,
@@ -53,6 +57,17 @@ const CATEGORIES = [
     "Aksesori",
     "Barang Pribadi",
     "Kunci",
+    "Lainnya",
+];
+
+const LOCATION_OPTIONS = [
+    "Kantin",
+    "Mushola",
+    "Parkiran",
+    "Gedung Utama",
+    "Gedung TA",
+    "Smoking Area",
+    "Gedung Techno",
     "Lainnya",
 ];
 
@@ -80,6 +95,22 @@ const getReportType = (report) => {
     return ["hilang", "kehilangan"].includes(type)
         ? "hilang"
         : "temuan";
+};
+
+// Menyesuaikan data lokasi laporan lama.
+const getInitialLocationData = (report) => {
+    const oldLocation = String(report?.lokasi || "");
+    const isKnownLocation = LOCATION_OPTIONS.includes(oldLocation);
+
+    return {
+        lokasi: isKnownLocation
+            ? oldLocation
+            : oldLocation
+                ? "Lainnya"
+                : "",
+        ruangan: report?.ruangan || (!isKnownLocation ? oldLocation : ""),
+        detailLokasi: report?.detailLokasi || "",
+    };
 };
 
 // Mengambil hanya data identitas yang dapat digunakan kembali.
@@ -134,10 +165,7 @@ const savePreviousFormData = (formType, formData) => {
             PREVIOUS_FORM_STORAGE_KEY,
             JSON.stringify({
                 ...previousData,
-                [formType]: getReusableFormData(
-                    formType,
-                    formData
-                ),
+                [formType]: getReusableFormData(formType, formData),
             })
         );
     } catch (error) {
@@ -163,30 +191,30 @@ export default function ReportForm({
         ? getReportType(initialReport)
         : null;
 
-    const [page, setPage] = useState(
-        initialType || "pilihan"
-    );
+    const [page, setPage] = useState(initialType || "pilihan");
 
     const [lostForm, setLostForm] = useState(() => ({
         ...INITIAL_LOST_FORM,
         ...(initialType === "hilang" ? initialReport : {}),
+        ...(initialType === "hilang"
+            ? getInitialLocationData(initialReport)
+            : {}),
     }));
 
     const [foundForm, setFoundForm] = useState(() => ({
         ...INITIAL_FOUND_FORM,
         ...(initialType === "temuan" ? initialReport : {}),
+        ...(initialType === "temuan"
+            ? getInitialLocationData(initialReport)
+            : {}),
     }));
 
     const [lostPhoto, setLostPhoto] = useState(
-        initialType === "hilang"
-            ? initialReport?.foto || null
-            : null
+        initialType === "hilang" ? initialReport?.foto || null : null
     );
 
     const [foundPhoto, setFoundPhoto] = useState(
-        initialType === "temuan"
-            ? initialReport?.foto || null
-            : null
+        initialType === "temuan" ? initialReport?.foto || null : null
     );
 
     const [error, setError] = useState("");
@@ -199,9 +227,7 @@ export default function ReportForm({
     const [resetCount, setResetCount] = useState(0);
 
     const [hasPreviousData, setHasPreviousData] = useState(
-        Boolean(
-            getPreviousFormData(initialType || "hilang")
-        )
+        Boolean(getPreviousFormData(initialType || "hilang"))
     );
 
     const photoInputRef = useRef(null);
@@ -295,6 +321,7 @@ export default function ReportForm({
             setCurrentForm({
                 ...(isLost ? INITIAL_LOST_FORM : INITIAL_FOUND_FORM),
                 ...initialReport,
+                ...getInitialLocationData(initialReport),
             });
 
             setCurrentPhoto(initialReport?.foto || null);
@@ -352,6 +379,7 @@ export default function ReportForm({
                 "tanggalKejadian",
                 "waktuKejadian",
                 "lokasi",
+                "ruangan",
                 "kronologi",
             ]
             : [
@@ -363,14 +391,14 @@ export default function ReportForm({
                 "tanggalKejadian",
                 "waktuKejadian",
                 "lokasi",
+                "ruangan",
                 "deskripsi",
                 "kronologi",
                 "namaPamdal",
             ];
 
         const hasEmptyField = requiredFields.some(
-            (field) =>
-                !String(currentForm[field] ?? "").trim()
+            (field) => !String(currentForm[field] ?? "").trim()
         );
 
         if (hasEmptyField) {
@@ -466,12 +494,7 @@ export default function ReportForm({
     };
 
     // Membuat komponen input formulir.
-    const renderField = (
-        name,
-        label,
-        placeholder = "",
-        options = {}
-    ) => {
+    const renderField = (name, label, placeholder = "", options = {}) => {
         const value = currentForm[name] ?? "";
 
         return (
@@ -892,11 +915,32 @@ export default function ReportForm({
 
                                 {renderField(
                                     "lokasi",
-                                    isLost ? "Lokasi Kehilangan" : "Lokasi Penemuan",
-                                    "Contoh: Area parkir gedung A",
+                                    "Gedung / Area",
+                                    "",
+                                    {
+                                        type: "select",
+                                        data: LOCATION_OPTIONS,
+                                        full: true,
+                                        required: true,
+                                    }
+                                )}
+
+                                {renderField(
+                                    "ruangan",
+                                    "Ruangan / Area Spesifik",
+                                    "Contoh: Ruang 203, Laboratorium Komputer, dekat kasir",
                                     {
                                         full: true,
                                         required: true,
+                                    }
+                                )}
+
+                                {renderField(
+                                    "detailLokasi",
+                                    "Detail Lokasi (Opsional)",
+                                    "Contoh: Di atas meja paling belakang atau dekat pintu",
+                                    {
+                                        full: true,
                                     }
                                 )}
 

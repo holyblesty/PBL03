@@ -1,3 +1,10 @@
+
+/**
+ * File: ItemDetail.jsx
+ * Fungsi: Menampilkan informasi lengkap barang yang dipilih dari katalog publik, termasuk lokasi, deskripsi, kronologi, dan status barang.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React from "react";
 
 // Menampilkan informasi detail barang yang dipilih dari katalog publik.
@@ -8,7 +15,9 @@ export default function ItemDetail({ item, onBack }) {
     const status = String(item.status || "").toLowerCase();
     const kronologi = item.kronologi || item.kronologiKejadian || "";
 
-    const isKehilangan = jenis.includes("hilang") || jenis.includes("kehilangan");
+    const isKehilangan =
+        jenis.includes("hilang") || jenis.includes("kehilangan");
+
     const isReturned = status.includes("dikembalikan");
 
     return (
@@ -22,6 +31,7 @@ export default function ItemDetail({ item, onBack }) {
                 >
                     ← Kembali
                 </button>
+
                 <h1>Detail Barang</h1>
                 <p>Informasi lengkap mengenai barang yang dilaporkan.</p>
             </div>
@@ -30,11 +40,19 @@ export default function ItemDetail({ item, onBack }) {
                 <div className="item-detail-image-section">
                     <div className="item-detail-image-wrapper">
                         <img
-                            src={item.foto || item.image || "https://via.placeholder.com/400"}
+                            src={
+                                item.foto ||
+                                item.image ||
+                                "https://via.placeholder.com/400"
+                            }
                             alt={item.namaBarang || "Foto barang"}
                             className="item-detail-image"
                         />
-                        <span className={`item-detail-type ${isKehilangan ? "kehilangan" : "penemuan"}`}>
+
+                        <span
+                            className={`item-detail-type ${isKehilangan ? "kehilangan" : "penemuan"
+                                }`}
+                        >
                             {isKehilangan ? "Kehilangan" : "Penemuan"}
                         </span>
                     </div>
@@ -43,9 +61,14 @@ export default function ItemDetail({ item, onBack }) {
                 <div className="item-detail-content">
                     <div className="item-detail-title-row">
                         <div>
-                            <span className="item-detail-category">{item.kategori || "UMUM"}</span>
-                            <h2>{item.namaBarang || "Nama barang tidak tersedia"}</h2>
+                            <span className="item-detail-category">
+                                {item.kategori || "UMUM"}
+                            </span>
+                            <h2>
+                                {item.namaBarang || "Nama barang tidak tersedia"}
+                            </h2>
                         </div>
+
                         <span className="item-detail-status">
                             {item.status || "Dipublikasikan"}
                         </span>
@@ -53,24 +76,51 @@ export default function ItemDetail({ item, onBack }) {
 
                     <div className="item-detail-info-grid">
                         <div className="item-info-item">
-                            <span className="item-info-label">📍 Lokasi</span>
+                            <span className="item-info-label">
+                                📍 Gedung / Area
+                            </span>
                             <strong>{item.lokasi || "-"}</strong>
                         </div>
+
                         <div className="item-info-item">
-                            <span className="item-info-label">📅 Tanggal Kejadian</span>
-                            <strong>{item.tanggalKejadian || item.tanggalLaporan || "-"}</strong>
+                            <span className="item-info-label">
+                                🚪 Ruangan / Area Spesifik
+                            </span>
+                            <strong>{item.ruangan || "-"}</strong>
+                        </div>
+
+                        <div className="item-info-item">
+                            <span className="item-info-label">
+                                📌 Detail Lokasi
+                            </span>
+                            <strong>{item.detailLokasi || "-"}</strong>
+                        </div>
+
+                        <div className="item-info-item">
+                            <span className="item-info-label">
+                                📅 Tanggal Kejadian
+                            </span>
+                            <strong>
+                                {item.tanggalKejadian ||
+                                    item.tanggalLaporan ||
+                                    "-"}
+                            </strong>
                         </div>
                     </div>
 
                     <div className="item-description-section">
                         <h3>Deskripsi Barang</h3>
-                        <p>{item.deskripsi || "Tidak ada deskripsi tambahan."}</p>
+                        <p>
+                            {item.deskripsi ||
+                                "Tidak ada deskripsi tambahan."}
+                        </p>
                     </div>
 
                     <div className="item-description-section">
                         <h3>Kronologi Kejadian</h3>
                         <p>
-                            {kronologi || "Tidak ada kronologi kejadian yang dicantumkan."}
+                            {kronologi ||
+                                "Tidak ada kronologi kejadian yang dicantumkan."}
                         </p>
                     </div>
 
@@ -103,7 +153,11 @@ export default function ItemDetail({ item, onBack }) {
                     )}
 
                     <div className="item-detail-actions">
-                        <button type="button" className="item-back-secondary" onClick={onBack}>
+                        <button
+                            type="button"
+                            className="item-back-secondary"
+                            onClick={onBack}
+                        >
                             Kembali ke Daftar Barang
                         </button>
                     </div>
