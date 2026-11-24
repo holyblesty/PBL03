@@ -1,0 +1,47 @@
+/* Halaman Riwayat Laporan (Pamdal). Judul, footer, pager, dan modal memakai class bh-* dari AdminBarangHilang.css */
+
+.rl-tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+.rl-tab {
+  height: 32px; padding: 0 16px; font-size: 12px; font-weight: 700; cursor: pointer;
+  background: #fff; color: var(--lf-charcoal); border: 1.5px solid var(--lf-charcoal); border-radius: 999px;
+}
+.rl-tab:hover { border-color: var(--lf-gold); }
+.rl-tab.active { background: var(--lf-charcoal); color: var(--lf-gold); border-color: var(--lf-charcoal); }
+
+.rl-filters { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.rl-filters input, .rl-filters select {
+  height: 34px; padding: 0 12px; font-size: 12px; color: var(--lf-charcoal); background: #fff;
+  border: 1px solid var(--lf-line-2); border-radius: 6px; outline: none; box-sizing: border-box;
+}
+.rl-filters input:focus, .rl-filters select:focus {
+  border-color: var(--lf-orange); box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+}
+.rl-search { flex: 0 0 32%; min-width: 200px; }
+.rl-select { flex: 0 0 17%; min-width: 140px; }
+
+.rl-table-wrap { overflow-x: auto; border: 1px solid var(--lf-line-2); border-radius: 6px; background: #fff; }
+.rl-table { width: 100%; border-collapse: collapse; font-size: 11px; color: var(--lf-charcoal); }
+.rl-table th {
+  text-align: left; padding: 12px 14px; font-weight: 700; background: #F3F4F6; white-space: nowrap;
+  border-bottom: 1px solid var(--lf-line-2);
+}
+.rl-table td { padding: 11px 14px; border-bottom: 1px solid var(--lf-line-2); white-space: nowrap; }
+.rl-table tbody tr:last-child td { border-bottom: none; }
+.rl-table tbody tr:hover { background: #FAFAFA; }
+.rl-empty { text-align: center; padding: 40px 0 !important; color: var(--lf-muted); font-size: 12px; }
+
+.rl-badge {
+  display: inline-block; padding: 2px 10px; font-size: 10px; font-weight: 700; border-radius: 999px;
+  background: #E0E7FF; color: #3730A3; border: 1px solid #818CF8;
+}
+.rl-detail-btn {
+  height: 26px; padding: 0 12px; font-size: 11px; font-weight: 700; cursor: pointer;
+  background: #fff; color: var(--lf-charcoal); border: 1.5px solid var(--lf-charcoal); border-radius: 5px;
+}
+.rl-detail-btn:hover { background: var(--lf-charcoal); color: var(--lf-gold); }
+
+/* Isi modal detail */
+.rl-modal-img { width: 100%; max-height: 180px; object-fit: contain; border: 1px solid var(--lf-line-2); border-radius: 6px; margin-bottom: 12px; background: #F9FAFB; }
+.rl-modal-sign { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.rl-modal-sign figure { margin: 0; text-align: center; font-size: 10px; color: var(--lf-muted); }
+.rl-modal-sign img { width: 100%; height: 70px; object-fit: contain; border: 1px solid var(--lf-line-2); border-radius: 6px; background: #fff; }
