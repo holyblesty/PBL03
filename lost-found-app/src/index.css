@@ -1,0 +1,21 @@
+:root {
+  --lf-charcoal: #111827;
+  --lf-charcoal-2: #1F2937;
+  --lf-gold: #FBBF24;
+  --lf-orange: #F59E0B;
+  --lf-gold-soft: #FFFBEB;
+  --lf-canvas: #F8FAFC;
+  --lf-line: #E2E8F0;
+  --lf-line-2: #CBD5E1;
+  --lf-muted: #64748B;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+}

@@ -1,0 +1,483 @@
+/* =========================================================
+   PALET WARNA SECURITY HIGH-CONTRAST
+   - Charcoal Pekat    : #111827
+   - Safety Gold       : #FBBF24
+   - Accent Orange     : #F59E0B
+   - Putih Keabu-abuan : #E2E8F0
+   - Abu-abu Redup     : #64748B
+   - Canvas Background : #F8FAFC
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #F8FAFC;
+  color: #111827;
+}
+
+.app-canvas {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #111827;
+  padding: 1rem 2rem;
+  border-bottom: 3px solid #FBBF24;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.shield-icon {
+  font-size: 1.2rem;
+}
+
+.brand-title {
+  color: #FFFFFF;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.nav-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #FBBF24;
+  color: #111827;
+  border: none;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-primary:hover {
+  background-color: #F59E0B;
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: #E2E8F0;
+  border: 1px solid #64748B;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background-color: #64748B;
+  color: #FFFFFF;
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #FBBF24;
+  border: 2px solid #FBBF24;
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-outline:hover {
+  background-color: #FBBF24;
+  color: #111827;
+}
+
+.btn-full {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.btn-large {
+  padding: 0.8rem 1.6rem;
+  font-size: 1rem;
+}
+
+/* Main Layout */
+.main-content {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+}
+
+/* Landing Page Layout */
+.landing-container {
+  max-width: 900px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.hero-card {
+  background-color: #111827;
+  color: #FFFFFF;
+  padding: 3rem 2rem;
+  border-radius: 12px;
+  border-left: 6px solid #FBBF24;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.hero-badge {
+  display: inline-block;
+  background-color: rgba(251, 191, 36, 0.15);
+  color: #FBBF24;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.hero-title {
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
+  color: #FFFFFF;
+}
+
+.hero-subtitle {
+  color: #E2E8F0;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-card {
+  background-color: #FFFFFF;
+  padding: 1.5rem;
+  border-radius: 8px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+  color: #111827;
+}
+
+.feature-card p {
+  color: #64748B;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+/* Auth Cards (Login & Register) */
+.auth-card {
+  background-color: #111827;
+  color: #FFFFFF;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  border-radius: 12px;
+  border-top: 5px solid #FBBF24;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.25);
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-badge {
+  display: inline-block;
+  color: #FBBF24;
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.auth-header h2 {
+  font-size: 1.75rem;
+  color: #FFFFFF;
+  margin-bottom: 0.5rem;
+}
+
+.auth-desc {
+  color: #E2E8F0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Forms */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  color: #E2E8F0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.form-group input {
+  background-color: #1F2937;
+  border: 1px solid #64748B;
+  color: #FFFFFF;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus {
+  border-color: #F59E0B;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.form-group input::placeholder {
+  color: #64748B;
+}
+
+/* Auth Footer */
+.auth-footer {
+  margin-top: 1.8rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #E2E8F0;
+}
+
+.auth-link {
+  color: #FBBF24;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.auth-link:hover {
+  color: #F59E0B;
+}
+
+.pamdal-info {
+  display: block;
+  margin-top: 0.8rem;
+  color: #64748B;
+  font-size: 0.75rem;
+}
+
+/* Responsif Mobile */
+@media (max-width: 600px) {
+  .navbar {
+    padding: 0.8rem 1rem;
+  }
+  
+  .auth-card {
+    padding: 1.8rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+  }
+}
+/* =========================
+   ADMIN DASHBOARD
+========================= */
+
+.admin-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #F8FAFC;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+  background-color: #F8FAFC;
+}
+
+.dashboard-content {
+  padding: 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-header {
+  text-align: center;
+}
+
+.admin-header h1 {
+  font-size: 28px;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 6px;
+}
+
+.admin-header p {
+  font-size: 16px;
+  color: #64748B;
+  margin: 0;
+}
+
+
+/* =========================
+   STATISTICS
+========================= */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.stat-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 10px;
+  padding: 24px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.stat-card h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #64748B;
+  text-transform: uppercase;
+}
+
+.stat-card p {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 800;
+}
+
+.stat-blue {
+  color: #3B82F6;
+}
+
+.stat-green {
+  color: #10B981;
+}
+
+.stat-yellow {
+  color: #F59E0B;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-content {
+    padding: 20px;
+  }
+}
+
+/* =========================
+   PILIHAN JENIS AKUN LOGIN
+   ========================= */
+
+.login-role-switch {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+.login-role-button {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 8px;
+  border: 1px solid #64748B;
+  border-radius: 6px;
+  background-color: #1F2937;
+  color: #E2E8F0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.login-role-button:hover {
+  border-color: #FBBF24;
+  color: #FBBF24;
+}
+
+.login-role-button.active {
+  background-color: #FBBF24;
+  border-color: #FBBF24;
+  color: #111827;
+  font-weight: 700;
+}
+
+.login-role-button:focus-visible {
+  outline: 2px solid #F59E0B;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .login-role-switch {
+    gap: 8px;
+  }
+
+  .login-role-button {
+    padding: 10px 5px;
+    font-size: 13px;
+  }
+}

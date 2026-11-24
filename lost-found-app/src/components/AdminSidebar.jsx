@@ -67,7 +67,7 @@ function AdminSidebar() {
     {
       id: 'riwayat-laporan',
       name: 'Riwayat Laporan',
-      path: '#riwayat-laporan',
+            path: '/riwayat-laporan',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <circle cx="12" cy="12" r="9" />
@@ -76,9 +76,9 @@ function AdminSidebar() {
       ),
     },
     {
-      id: 'settings',
-      name: 'Settings',
-      path: '#settings',
+            id: 'pengaturan',
+      name: 'Pengaturan',
+      path: '/pengaturan',
       icon: (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
           <circle cx="12" cy="12" r="3" />
