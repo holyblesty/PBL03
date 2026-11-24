@@ -1,0 +1,48 @@
+/* Halaman Pengaturan (Pamdal). Judul dan subjudul memakai class bh-* dari AdminBarangHilang.css */
+
+.pg-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+
+.pg-card {
+  background: #fff; border: 1px solid var(--lf-line-2); border-radius: 10px;
+  padding: 20px 22px 24px; box-sizing: border-box;
+}
+.pg-card-title { margin: 0 0 16px; font-size: 15px; font-weight: 800; color: var(--lf-charcoal); }
+
+.pg-avatar-row { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.pg-avatar {
+  width: 60px; height: 60px; flex-shrink: 0; border-radius: 50%; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--lf-charcoal); color: var(--lf-gold); font-size: 22px; font-weight: 800;
+  border: 2px solid var(--lf-line);
+}
+.pg-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.pg-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 18px; }
+.pg-full { grid-column: 1 / -1; }
+.pg-stack { display: flex; flex-direction: column; gap: 14px; }
+
+.pg-label { display: block; margin-bottom: 5px; font-size: 11px; font-weight: 700; color: var(--lf-charcoal); }
+.pg-input {
+  width: 100%; height: 36px; padding: 0 12px; font-size: 12px; color: var(--lf-charcoal); background: #fff;
+  border: 1px solid var(--lf-line-2); border-radius: 6px; outline: none; box-sizing: border-box;
+}
+.pg-input:focus { border-color: var(--lf-orange); box-shadow: 0 0 0 3px rgba(245, 158, 11, .2); }
+
+.pg-btn {
+  margin-top: 22px; height: 36px; padding: 0 20px; border: none; border-radius: 6px; cursor: pointer;
+  background: var(--lf-charcoal); color: var(--lf-gold); font-size: 12px; font-weight: 700;
+}
+.pg-btn:hover { background: var(--lf-charcoal-2); }
+.pg-btn-outline {
+  height: 30px; padding: 0 18px; border-radius: 6px; cursor: pointer;
+  background: #fff; color: var(--lf-charcoal); border: 1.5px solid var(--lf-charcoal); font-size: 12px; font-weight: 700;
+}
+.pg-btn-outline:hover { background: var(--lf-charcoal); color: var(--lf-gold); }
+
+.pg-msg { margin: 16px 0 0; padding: 9px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.pg-msg.ok { background: #ECFDF5; color: #047857; border: 1px solid #A7F3D0; }
+.pg-msg.err { background: #FEF2F2; color: #B91C1C; border: 1px solid #FECACA; }
+.pg-msg + .pg-btn { margin-top: 16px; }
+
+@media (max-width: 1000px) { .pg-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) { .pg-form-grid { grid-template-columns: 1fr; } }

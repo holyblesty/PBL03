@@ -1,0 +1,69 @@
+.bh-wrap { padding: 28px; }
+.bh-title { margin: 0; font-size: 24px; font-weight: 800; color: var(--lf-charcoal); }
+.bh-sub { margin: 4px 0 18px; font-size: 13px; color: var(--lf-muted); }
+
+.bh-filters { display: grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; }
+.bh-filters input, .bh-filters select {
+  height: 38px; padding: 0 12px; font-size: 13px; color: var(--lf-charcoal); background: #fff;
+  border: 1px solid var(--lf-line-2); border-radius: 6px; outline: none; box-sizing: border-box; width: 100%;
+}
+.bh-filters input:focus, .bh-filters select:focus {
+  border-color: var(--lf-orange); box-shadow: 0 0 0 3px rgba(245, 158, 11, .2);
+}
+
+.bh-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.bh-card {
+  background: #fff; border: 1px solid var(--lf-line); border-radius: 8px; padding: 10px;
+  display: flex; flex-direction: column; box-shadow: 0 1px 3px rgba(17, 24, 39, .06);
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.bh-card:hover { border-color: var(--lf-gold); box-shadow: 0 6px 16px rgba(17, 24, 39, .1); }
+.bh-photo {
+  position: relative; height: 150px; background: var(--lf-line); border-radius: 6px;
+  display: flex; align-items: center; justify-content: center; color: var(--lf-muted);
+}
+.bh-photo svg { width: 64px; height: 64px; }
+.bh-photo small { position: absolute; right: 8px; bottom: 6px; font-size: 9px; color: var(--lf-muted); }
+.bh-badge {
+  position: absolute; left: 8px; top: 8px; padding: 2px 10px; font-size: 10px; font-weight: 700;
+  background: #FEF3C7; color: #92400E; border: 1px solid var(--lf-gold); border-radius: 999px;
+}
+.bh-body { padding: 10px 2px 2px; display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.bh-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.bh-name { margin: 0; font-size: 15px; font-weight: 800; color: var(--lf-charcoal); }
+.bh-code { font-size: 9px; color: var(--lf-muted); }
+.bh-loc { font-size: 12px; font-weight: 600; color: var(--lf-charcoal-2); display: flex; align-items: center; gap: 5px; }
+.bh-meta { font-size: 10px; color: var(--lf-muted); }
+.bh-btn {
+  margin-top: 8px; height: 32px; border: none; border-radius: 6px; cursor: pointer;
+  background: var(--lf-charcoal); color: var(--lf-gold); font-size: 12px; font-weight: 700;
+}
+.bh-btn:hover { background: var(--lf-charcoal-2); }
+
+.bh-empty { grid-column: 1 / -1; text-align: center; padding: 48px 0; color: var(--lf-muted); font-size: 13px; }
+
+.bh-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; font-size: 11px; color: var(--lf-muted); }
+.bh-pager { display: flex; gap: 6px; }
+.bh-pager button {
+  min-width: 28px; height: 26px; padding: 0 8px; font-size: 11px; font-weight: 600; cursor: pointer;
+  background: #fff; color: var(--lf-charcoal); border: 1px solid var(--lf-line-2); border-radius: 5px;
+}
+.bh-pager button:hover:not(:disabled) { border-color: var(--lf-gold); }
+.bh-pager button.active { background: var(--lf-charcoal); color: var(--lf-gold); border-color: var(--lf-charcoal); }
+.bh-pager button:disabled { opacity: .4; cursor: not-allowed; }
+
+.bh-overlay {
+  position: fixed; inset: 0; background: rgba(17, 24, 39, .6);
+  display: flex; align-items: center; justify-content: center; z-index: 50; padding: 16px;
+}
+.bh-modal {
+  background: #fff; border-radius: 10px; border-top: 4px solid var(--lf-gold);
+  width: min(460px, 100%); padding: 20px; box-shadow: 0 20px 40px rgba(0, 0, 0, .25);
+}
+.bh-modal h3 { margin: 0 0 12px; font-size: 18px; color: var(--lf-charcoal); }
+.bh-modal dl { display: grid; grid-template-columns: 110px 1fr; gap: 8px 12px; margin: 0 0 16px; font-size: 13px; }
+.bh-modal dt { color: var(--lf-muted); }
+.bh-modal dd { margin: 0; color: var(--lf-charcoal); font-weight: 600; }
+
+@media (max-width: 1000px) { .bh-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bh-filters { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 640px) { .bh-grid { grid-template-columns: 1fr; } .bh-filters { grid-template-columns: 1fr; } }
