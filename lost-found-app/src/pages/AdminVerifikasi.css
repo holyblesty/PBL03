@@ -1,0 +1,231 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+}
+
+.admin-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.verifikasi-page {
+  padding: 28px 32px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+}
+
+.page-header p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.filter-container {
+  display: grid;
+  grid-template-columns: 1fr 220px 180px;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 42px;
+  padding: 0 14px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+}
+
+.search-box span {
+  font-size: 20px;
+  color: #64748b;
+}
+
+.search-box input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: #111827;
+}
+
+.filter-container select {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  background: white;
+  color: #334155;
+  font-size: 14px;
+  outline: none;
+}
+
+.report-section {
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 17px;
+  color: #111827;
+}
+
+.section-header span {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 1050px;
+}
+
+.report-table th {
+  background: #f1f5f9;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: left;
+  padding: 13px 12px;
+  border-bottom: 1px solid #cbd5e1;
+  white-space: nowrap;
+}
+
+.report-table td {
+  padding: 13px 12px;
+  font-size: 13px;
+  color: #334155;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+}
+
+.report-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.pelapor-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.pelapor-cell strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.pelapor-cell small {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border: 1px solid #94a3b8;
+  border-radius: 20px;
+  font-size: 11px;
+  color: #475569;
+  white-space: nowrap;
+}
+
+.photo-placeholder {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+  color: #64748b;
+  font-size: 17px;
+}
+
+.btn-lihat {
+  padding: 7px 17px;
+  background: white;
+  border: 1px solid #94a3b8;
+  border-radius: 5px;
+  color: #111827;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.btn-lihat:hover {
+  background: #f1f5f9;
+}
+
+.table-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.pagination {
+  display: flex;
+  gap: 5px;
+}
+
+.pagination button {
+  width: 30px;
+  height: 30px;
+  background: white;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.pagination .active-page {
+  background: #111827;
+  color: white;
+  border-color: #111827;
+}
+
+.empty-data {
+  text-align: center;
+  padding: 35px !important;
+  color: #64748b !important;
+}
+
+@media (max-width: 900px) {
+  .verifikasi-page {
+    padding: 20px;
+  }
+
+  .filter-container {
+    grid-template-columns: 1fr;
+  }
+}
