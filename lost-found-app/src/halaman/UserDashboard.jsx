@@ -1,321 +1,130 @@
+
 /**
  * File: UserDashboard.jsx
- * Fungsi: Menampilkan dashboard pengguna, katalog barang, serta mengelola laporan pengguna melalui localStorage.
+ * Fungsi: Menampilkan katalog barang hilang dan temuan dari database MySQL, form laporan, serta riwayat laporan pengguna.
  * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
  */
 
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import UserSidebar from "../components/UserSidebar";
 import UserNavbar from "../components/UserNavbar";
-import ReportForm from "../components/ReportForm";
 import ItemDetail from "../components/ItemDetail";
+import ReportForm from "../components/ReportForm";
+import UserFooter from "../components/UserFooter";
 import RiwayatLaporan from "../components/RiwayatLaporan";
 import "../App.css";
 
-const DUMMY_REPORTS = [
-    {
-        id: 1,
-        namaBarang: "Dompet Hitam Kulit",
-        jenis: "Kehilangan",
-        kategori: "Dompet",
-        lokasi: "Gedung Utama (Mushola Lantai 1)",
-        tanggal: "26 Sep 2026",
-        status: "Dipublikasikan",
-        foto: "https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Dompet kulit warna hitam merek Fossil, berisi Kartu Identitas dan STTM.",
-    },
-    {
-        id: 2,
-        namaBarang: "Tumbler Corkcicle",
-        jenis: "Penemuan",
-        kategori: "Botol Minum",
-        lokasi: "Kantin",
-        tanggal: "24 Sep 2026",
-        status: "Dipublikasikan",
-        foto: "https://images.unsplash.com/photo-1602143407151-7111542de6e8?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Tumbler warna biru navy tertinggal di atas meja makan kantin.",
-    },
-    {
-        id: 3,
-        namaBarang: "Kunci Motor Honda",
-        jenis: "Kehilangan",
-        kategori: "Kunci",
-        lokasi: "Parkiran",
-        tanggal: "27 Sep 2026",
-        status: "Dipublikasikan",
-        foto: "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Kunci kontak motor Honda Beat dengan gantungan kunci kecil warna merah.",
-    },
-    {
-        id: 4,
-        namaBarang: "Laptop ASUS Vivobook",
-        jenis: "Kehilangan",
-        kategori: "Elektronik",
-        lokasi: "Gedung TA",
-        tanggal: "28 Sep 2026",
-        status: "Dipublikasikan",
-        foto: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Laptop ASUS Vivobook warna silver yang tertinggal di ruang kelas.",
-    },
-    {
-        id: 5,
-        namaBarang: "Jaket Hitam",
-        jenis: "Penemuan",
-        kategori: "Pakaian",
-        lokasi: "Gedung Utama",
-        tanggal: "29 Sep 2026",
-        tanggalKejadian: "29 Sep 2026",
-        tanggalSelesai: "02 Okt 2026",
-        status: "Dikembalikan",
-        foto: "https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Jaket hitam ditemukan di area lorong Gedung Utama.",
-        pesanPamdal: "Barang telah diserahkan kepada pemilik setelah bukti kepemilikan diverifikasi oleh Pamdal.",
-    },
-    {
-        id: 6,
-        namaBarang: "Earphone Wireless",
-        jenis: "Penemuan",
-        kategori: "Elektronik",
-        lokasi: "Smoking Area",
-        tanggal: "30 Sep 2026",
-        status: "Dipublikasikan",
-        foto: "https://images.unsplash.com/photo-1606220945770-b5b6c2c55bf1?auto=format&fit=crop&w=500&q=80",
-        deskripsi: "Earphone wireless putih ditemukan di sekitar Smoking Area.",
-    },
-];
-
-const KATEGORI_OPTIONS = [
-    "Dompet",
-    "Botol Minum",
-    "Kunci",
-    "Elektronik",
-    "Pakaian",
-    "Aksesoris",
-];
-
-const LOKASI_OPTIONS = [
-    "Kantin",
-    "Mushola",
-    "Parkiran",
-    "Gedung Utama",
-    "Gedung TA",
-    "Smoking Area",
-    "Gedung Techno",
-];
-
-const REPORTS_STORAGE_KEY = "lost_found_user_reports";
-
-const loadUserReports = () => {
-    try {
-        const savedReports = localStorage.getItem(REPORTS_STORAGE_KEY);
-        const parsedReports = savedReports ? JSON.parse(savedReports) : [];
-
-        return Array.isArray(parsedReports) ? parsedReports : [];
-    } catch {
-        return [];
-    }
-};
-
-const saveUserReports = (reports) => {
-    try {
-        localStorage.setItem(
-            REPORTS_STORAGE_KEY,
-            JSON.stringify(reports)
-        );
-    } catch {
-        throw new Error("Penyimpanan browser penuh atau tidak tersedia.");
-    }
-};
-
-const fileToDataUrl = (file) => {
-    if (!(file instanceof File)) {
-        return Promise.resolve(file || "");
-    }
-
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject(new Error("Foto gagal dibaca."));
-
-        reader.readAsDataURL(file);
-    });
-};
-
-const getReportType = (report) => {
-    const type = String(
-        report?.jenisLaporan || report?.jenis || ""
-    ).toLowerCase();
-
-    if (type === "hilang" || type === "kehilangan") {
-        return "Kehilangan";
-    }
-
-    if (type === "temuan" || type === "penemuan") {
-        return "Penemuan";
-    }
-
-    return "";
-};
-
-const isReportEditable = (report) => {
-    if (!report || report.status === "Dikembalikan") {
-        return false;
-    }
-
-    const jenis = getReportType(report);
-
-    if (jenis === "Kehilangan") {
-        return true;
-    }
-
-    return (
-        jenis === "Penemuan" &&
-        report.status === "Menunggu Penerimaan Barang"
-    );
-};
+// URL API backend
+const API_URL = "http://localhost:5000/api/laporan";
 
 export default function UserDashboard() {
     const [activeTab, setActiveTab] = useState("dashboard");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [userReports, setUserReports] = useState(loadUserReports);
-    const [editingReport, setEditingReport] = useState(null);
+
+    const [katalog, setKatalog] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [loadError, setLoadError] = useState("");
+
+    // Menyimpan laporan pengguna di localStorage
+    const [laporanPengguna, setLaporanPengguna] = useState(() => {
+        try {
+            return JSON.parse(
+                localStorage.getItem("laporanPengguna")
+            ) || [];
+        } catch {
+            return [];
+        }
+    });
+
+    const mainRef = useRef(null);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [filterJenis, setFilterJenis] = useState("Semua");
     const [filterKategori, setFilterKategori] = useState("");
     const [filterLokasi, setFilterLokasi] = useState("");
 
-    const reportsForDisplay = userReports.map((report) => ({
-        ...report,
-        jenis: getReportType(report),
-        tanggal: report.tanggalKejadian || report.tanggal,
-        deskripsi: [
-            report.merekModel,
-            report.warna,
-            report.deskripsi,
-            report.kronologi,
-        ]
-            .filter(Boolean)
-            .join(" • "),
-    }));
+    // Mengambil data laporan dari database melalui backend.
+    const muatData = useCallback(async () => {
+        setLoading(true);
+        setLoadError("");
 
-    // Data riwayat mencakup laporan pengguna dan dummy yang sudah dikembalikan.
-    const historyReports = [
-        ...reportsForDisplay,
-        ...DUMMY_REPORTS
-            .filter((item) => item.status === "Dikembalikan")
-            .map((item) => ({
-                ...item,
-                tanggalKejadian: item.tanggalKejadian || item.tanggal,
-                buktiFoto: item.foto,
-            })),
-    ];
-
-    // Katalog hanya menampilkan laporan dengan status Dipublikasikan.
-    const activeReports = [
-        ...reportsForDisplay,
-        ...DUMMY_REPORTS,
-    ].filter((item) => item.status === "Dipublikasikan");
-
-    const persistReports = (updatedReports) => {
-        saveUserReports(updatedReports);
-        setUserReports(updatedReports);
-    };
-
-    const handleSubmitReport = async (payload) => {
         try {
-            const foto = await fileToDataUrl(payload.foto);
+            const response = await fetch(API_URL);
 
-            if (editingReport) {
-                const currentReport = userReports.find(
-                    (item) => item.id === editingReport.id
+            if (!response.ok) {
+                throw new Error(
+                    `Permintaan gagal (HTTP ${response.status})`
                 );
-
-                if (!currentReport || !isReportEditable(currentReport)) {
-                    setEditingReport(null);
-                    setActiveTab("riwayat-laporan");
-
-                    window.alert(
-                        "Laporan ini sudah tidak dapat diedit karena statusnya telah berubah."
-                    );
-
-                    return;
-                }
             }
 
-            const report = {
-                ...payload,
-                foto,
-                id: editingReport?.id || Date.now(),
-                dibuatPada:
-                    editingReport?.dibuatPada || new Date().toISOString(),
-            };
+            const data = await response.json();
 
-            const updatedReports = editingReport
-                ? userReports.map((item) =>
-                    item.id === editingReport.id ? report : item
-                )
-                : [report, ...userReports];
+            if (!Array.isArray(data)) {
+                throw new Error("Format respons API tidak sesuai.");
+            }
 
-            persistReports(updatedReports);
-            setEditingReport(null);
-            setActiveTab("riwayat-laporan");
+            // Menyesuaikan nama kolom SQL dengan kebutuhan React.
+            const dataKatalog = data.map((report) => ({
+                ...report,
+                jenis:
+                    report.jenis_laporan === "hilang"
+                        ? "Kehilangan"
+                        : "Penemuan",
+                jenisLaporan: report.jenis_laporan,
+                namaBarang: report.nama_barang,
+                merekModel: report.merek_model,
+                tanggalKejadian: report.tanggal_kejadian,
+                waktuKejadian: report.waktu_kejadian,
+                detailLokasi: report.detail_lokasi,
+                foto: report.foto_path,
+                tanggal: report.tanggal_kejadian,
+                deskripsi: [
+                    report.merek_model,
+                    report.warna,
+                    report.deskripsi,
+                ]
+                    .filter(Boolean)
+                    .join(" • "),
+            }));
+
+            setKatalog(dataKatalog);
         } catch (error) {
-            window.alert(error.message || "Laporan gagal disimpan.");
-        }
-    };
-
-    const handleEditReport = (report) => {
-        if (!isReportEditable(report)) {
-            window.alert(
-                "Laporan ini tidak dapat diedit karena statusnya sudah tidak memenuhi ketentuan."
+            setLoadError(
+                error.message || "Data gagal dimuat dari server."
             );
-            return;
+        } finally {
+            setLoading(false);
         }
+    }, []);
 
-        setEditingReport(report);
-        setSelectedItem(null);
-        setActiveTab("laporan");
-    };
+    // Memuat data saat dashboard pertama kali dibuka.
+    useEffect(() => {
+        muatData();
+    }, [muatData]);
 
-    const handleDeleteReport = (reportId) => {
-        const report = userReports.find(
-            (item) => item.id === reportId
-        );
-
-        if (!isReportEditable(report)) {
-            window.alert(
-                "Laporan ini tidak dapat dihapus karena statusnya sudah tidak memenuhi ketentuan."
-            );
-            return;
-        }
-
-        const confirmed = window.confirm(
-            "Yakin ingin menghapus laporan ini? Tindakan ini tidak dapat dibatalkan."
-        );
-
-        if (!confirmed) return;
-
-        persistReports(
-            userReports.filter((item) => item.id !== reportId)
-        );
-    };
-
-    const filteredReports = activeReports.filter((item) => {
+    // Menyaring katalog berdasarkan pencarian dan filter.
+    const filteredReports = katalog.filter((item) => {
         const keyword = searchQuery.trim().toLowerCase();
 
         const matchesSearch =
-            String(item.namaBarang || "").toLowerCase().includes(keyword) ||
-            String(item.deskripsi || "").toLowerCase().includes(keyword) ||
-            String(item.lokasi || "").toLowerCase().includes(keyword);
+            String(item.namaBarang || "")
+                .toLowerCase()
+                .includes(keyword) ||
+            String(item.deskripsi || "")
+                .toLowerCase()
+                .includes(keyword) ||
+            String(item.lokasi || "")
+                .toLowerCase()
+                .includes(keyword);
 
         const matchesJenis =
-            filterJenis === "Semua" || item.jenis === filterJenis;
+            filterJenis === "Semua" ||
+            item.jenis === filterJenis;
 
         const matchesKategori =
-            filterKategori === "" || item.kategori === filterKategori;
+            filterKategori === "" ||
+            item.kategori === filterKategori;
 
         const matchesLokasi =
             filterLokasi === "" ||
@@ -331,6 +140,18 @@ export default function UserDashboard() {
         );
     });
 
+    // Navigasi sidebar dan footer.
+    const handleNavigate = (tab) => {
+        setActiveTab(tab);
+        setSelectedItem(null);
+
+        mainRef.current?.scrollTo({
+            top: 0,
+            behavior: "smooth",
+        });
+    };
+
+    // Menghapus semua filter pencarian.
     const resetFilters = () => {
         setSearchQuery("");
         setFilterJenis("Semua");
@@ -338,16 +159,66 @@ export default function UserDashboard() {
         setFilterLokasi("");
     };
 
-    const jumlahSemua = activeReports.length;
+    // Menghitung jumlah laporan pada katalog.
+    const jumlahSemua = katalog.length;
 
-    const jumlahKehilangan = activeReports.filter(
+    const jumlahKehilangan = katalog.filter(
         (item) => item.jenis === "Kehilangan"
     ).length;
 
-    const jumlahPenemuan = activeReports.filter(
+    const jumlahPenemuan = katalog.filter(
         (item) => item.jenis === "Penemuan"
     ).length;
 
+    // Menyimpan laporan baru dari form.
+    const handleSubmitReport = async (payload) => {
+        const laporanBaru = {
+            ...payload,
+            id: Date.now(),
+            jenis:
+                payload.jenisLaporan === "hilang"
+                    ? "Kehilangan"
+                    : "Penemuan",
+            status:
+                payload.jenisLaporan === "hilang"
+                    ? "Dipublikasikan"
+                    : "Menunggu Penerimaan Barang",
+            tanggalKejadian:
+                payload.tanggalKejadian || payload.tanggal,
+            tanggal:
+                payload.tanggalKejadian || payload.tanggal,
+        };
+
+        const dataLaporan = [
+            laporanBaru,
+            ...laporanPengguna,
+        ];
+
+        setLaporanPengguna(dataLaporan);
+
+        localStorage.setItem(
+            "laporanPengguna",
+            JSON.stringify(dataLaporan)
+        );
+
+        handleNavigate("riwayat-laporan");
+    };
+
+    // Menghapus laporan dari riwayat.
+    const handleDeleteReport = (id) => {
+        const dataLaporan = laporanPengguna.filter(
+            (item) => item.id !== id
+        );
+
+        setLaporanPengguna(dataLaporan);
+
+        localStorage.setItem(
+            "laporanPengguna",
+            JSON.stringify(dataLaporan)
+        );
+    };
+
+    // Menampilkan detail barang yang dipilih.
     const renderMainContent = () => {
         if (selectedItem) {
             return (
@@ -358,25 +229,23 @@ export default function UserDashboard() {
             );
         }
 
+        // Menampilkan form laporan.
         if (activeTab === "laporan") {
             return (
                 <ReportForm
-                    key={editingReport?.id || "new-report"}
-                    initialReport={editingReport}
                     onSubmitReport={handleSubmitReport}
-                    onCancelEdit={() => {
-                        setEditingReport(null);
-                        setActiveTab("riwayat-laporan");
-                    }}
                 />
             );
         }
 
+        // Menampilkan riwayat laporan pengguna.
         if (activeTab === "riwayat-laporan") {
             return (
                 <RiwayatLaporan
-                    reports={historyReports}
-                    onEdit={handleEditReport}
+                    reports={laporanPengguna}
+                    onEdit={(item) => {
+                        console.log("Edit laporan:", item);
+                    }}
                     onDelete={handleDeleteReport}
                 />
             );
@@ -395,7 +264,59 @@ export default function UserDashboard() {
                     </p>
                 </div>
 
-                {/* PANEL PENCARIAN DAN FILTER */}
+                {/* Pesan error jika data gagal diambil */}
+                {loadError && (
+                    <div
+                        role="alert"
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "12px",
+                            flexWrap: "wrap",
+                            backgroundColor: "#FEF2F2",
+                            border: "1px solid #FECACA",
+                            color: "#B91C1C",
+                            borderRadius: "10px",
+                            padding: "12px 16px",
+                            marginBottom: "20px",
+                            fontSize: "13px",
+                        }}
+                    >
+                        <span>⚠️ {loadError}</span>
+
+                        <button
+                            type="button"
+                            onClick={muatData}
+                            style={{
+                                padding: "6px 12px",
+                                borderRadius: "7px",
+                                border: "1px solid #FCA5A5",
+                                backgroundColor: "#FFFFFF",
+                                color: "#B91C1C",
+                                fontWeight: "600",
+                                cursor: "pointer",
+                            }}
+                        >
+                            Coba lagi
+                        </button>
+                    </div>
+                )}
+
+                {/* Status loading */}
+                {loading && (
+                    <p
+                        style={{
+                            margin: "0 0 20px",
+                            fontSize: "13px",
+                            color: "#6B7280",
+                        }}
+                    >
+                        Memuat data dari database...
+                    </p>
+                )}
+
+                {/* Panel pencarian dan filter */}
                 <div
                     style={{
                         backgroundColor: "#FFFFFF",
@@ -446,7 +367,9 @@ export default function UserDashboard() {
                                 type="text"
                                 placeholder="Cari nama barang, deskripsi, atau lokasi..."
                                 value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onChange={(e) =>
+                                    setSearchQuery(e.target.value)
+                                }
                             />
                         </div>
                     </div>
@@ -460,15 +383,7 @@ export default function UserDashboard() {
                         }}
                     >
                         <div>
-                            <label
-                                style={{
-                                    display: "block",
-                                    fontSize: "13px",
-                                    fontWeight: "600",
-                                    color: "#374151",
-                                    marginBottom: "7px",
-                                }}
-                            >
+                            <label style={labelStyle}>
                                 Kategori
                             </label>
 
@@ -480,8 +395,19 @@ export default function UserDashboard() {
                                 style={selectStyle}
                             >
                                 <option value="">Semua Kategori</option>
-                                {KATEGORI_OPTIONS.map((kategori) => (
-                                    <option key={kategori} value={kategori}>
+
+                                {[
+                                    "Elektronik",
+                                    "Dokumen dan Identitas",
+                                    "Aksesori",
+                                    "Barang Pribadi",
+                                    "Kunci",
+                                    "Lainnya",
+                                ].map((kategori) => (
+                                    <option
+                                        key={kategori}
+                                        value={kategori}
+                                    >
                                         {kategori}
                                     </option>
                                 ))}
@@ -489,15 +415,7 @@ export default function UserDashboard() {
                         </div>
 
                         <div>
-                            <label
-                                style={{
-                                    display: "block",
-                                    fontSize: "13px",
-                                    fontWeight: "600",
-                                    color: "#374151",
-                                    marginBottom: "7px",
-                                }}
-                            >
+                            <label style={labelStyle}>
                                 Area Lokasi
                             </label>
 
@@ -509,8 +427,20 @@ export default function UserDashboard() {
                                 style={selectStyle}
                             >
                                 <option value="">Semua Area Lokasi</option>
-                                {LOKASI_OPTIONS.map((lokasi) => (
-                                    <option key={lokasi} value={lokasi}>
+
+                                {[
+                                    "Kantin",
+                                    "Mushola",
+                                    "Parkiran",
+                                    "Gedung Utama",
+                                    "Gedung TA",
+                                    "Smoking Area",
+                                    "Gedung Techno",
+                                ].map((lokasi) => (
+                                    <option
+                                        key={lokasi}
+                                        value={lokasi}
+                                    >
                                         {lokasi}
                                     </option>
                                 ))}
@@ -537,7 +467,7 @@ export default function UserDashboard() {
                     </div>
                 </div>
 
-                {/* TAB JENIS LAPORAN */}
+                {/* Tab jenis laporan */}
                 <div
                     style={{
                         backgroundColor: "#FFFFFF",
@@ -571,7 +501,9 @@ export default function UserDashboard() {
                         ].map((tab) => (
                             <button
                                 key={tab.value}
-                                onClick={() => setFilterJenis(tab.value)}
+                                onClick={() =>
+                                    setFilterJenis(tab.value)
+                                }
                                 style={{
                                     padding: "12px 4px",
                                     border: "none",
@@ -597,6 +529,7 @@ export default function UserDashboard() {
                     </div>
                 </div>
 
+                {/* Jumlah barang ditampilkan */}
                 <div
                     style={{
                         display: "flex",
@@ -620,7 +553,7 @@ export default function UserDashboard() {
                     </p>
                 </div>
 
-                {/* KATALOG BARANG AKTIF */}
+                {/* Katalog barang dari database */}
                 <div
                     style={{
                         display: "grid",
@@ -630,7 +563,7 @@ export default function UserDashboard() {
                         marginBottom: "24px",
                     }}
                 >
-                    {filteredReports.length > 0 ? (
+                    {loading ? null : filteredReports.length > 0 ? (
                         filteredReports.map((item) => {
                             const isKehilangan =
                                 item.jenis === "Kehilangan";
@@ -649,6 +582,7 @@ export default function UserDashboard() {
                                         flexDirection: "column",
                                     }}
                                 >
+                                    {/* Foto barang */}
                                     <div
                                         style={{
                                             position: "relative",
@@ -657,16 +591,33 @@ export default function UserDashboard() {
                                             overflow: "hidden",
                                         }}
                                     >
-                                        <img
-                                            src={item.foto}
-                                            alt={item.namaBarang}
-                                            style={{
-                                                width: "100%",
-                                                height: "100%",
-                                                objectFit: "cover",
-                                            }}
-                                        />
+                                        {item.foto ? (
+                                            <img
+                                                src={item.foto}
+                                                alt={item.namaBarang}
+                                                style={{
+                                                    width: "100%",
+                                                    height: "100%",
+                                                    objectFit: "cover",
+                                                }}
+                                            />
+                                        ) : (
+                                            <div
+                                                aria-hidden="true"
+                                                style={{
+                                                    height: "100%",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: "40px",
+                                                    color: "#9CA3AF",
+                                                }}
+                                            >
+                                                📦
+                                            </div>
+                                        )}
 
+                                        {/* Label jenis laporan */}
                                         <span
                                             style={{
                                                 position: "absolute",
@@ -688,6 +639,7 @@ export default function UserDashboard() {
                                         </span>
                                     </div>
 
+                                    {/* Informasi barang */}
                                     <div
                                         style={{
                                             padding: "16px",
@@ -699,7 +651,7 @@ export default function UserDashboard() {
                                                 fontSize: "16px",
                                                 fontWeight: "700",
                                                 color: "#1F2937",
-                                                margin: "0 0 8px 0",
+                                                margin: "0 0 8px",
                                             }}
                                         >
                                             {item.namaBarang}
@@ -733,7 +685,12 @@ export default function UserDashboard() {
                                         </p>
                                     </div>
 
-                                    <div style={{ padding: "0 16px 16px" }}>
+                                    {/* Tombol detail */}
+                                    <div
+                                        style={{
+                                            padding: "0 16px 16px",
+                                        }}
+                                    >
                                         <button
                                             onClick={() =>
                                                 setSelectedItem(item)
@@ -787,7 +744,12 @@ export default function UserDashboard() {
                                 Barang tidak ditemukan
                             </h3>
 
-                            <p style={{ margin: 0, fontSize: "13px" }}>
+                            <p
+                                style={{
+                                    margin: 0,
+                                    fontSize: "13px",
+                                }}
+                            >
                                 Coba ubah kata kunci atau filter pencarian.
                             </p>
                         </div>
@@ -813,13 +775,11 @@ export default function UserDashboard() {
                 onToggle={() =>
                     setSidebarCollapsed((prev) => !prev)
                 }
-                setActiveTab={(tab) => {
-                    setActiveTab(tab);
-                    setSelectedItem(null);
-                }}
+                setActiveTab={handleNavigate}
             />
 
             <main
+                ref={mainRef}
                 className="dashboard-main"
                 style={{
                     flex: 1,
@@ -841,11 +801,23 @@ export default function UserDashboard() {
                 >
                     {renderMainContent()}
                 </div>
+
+                <UserFooter onNavigate={handleNavigate} />
             </main>
         </div>
     );
 }
 
+// Style label filter
+const labelStyle = {
+    display: "block",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#374151",
+    marginBottom: "7px",
+};
+
+// Style select filter
 const selectStyle = {
     width: "100%",
     padding: "10px 12px",
@@ -857,6 +829,7 @@ const selectStyle = {
     outline: "none",
 };
 
+// Style informasi barang
 const metaStyle = {
     fontSize: "12px",
     color: "#6B7280",
