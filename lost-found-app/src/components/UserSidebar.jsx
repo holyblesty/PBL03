@@ -1,11 +1,17 @@
+/**
+ * File: UserSidebar.jsx
+ * Fungsi: Menampilkan navigasi samping dan menu halaman pengguna.
+ * Pembuat: Tim PBLIF03_MA03 (Jesina Holyblesty Simatupang dan Vivian Sarah Diva Alisianoi)
+ */
+
 import React, { useState } from 'react';
 
 // Terima activeTab dan setActiveTab sebagai props dari parent component
-export default function UserSidebar({ activeTab, setActiveTab }) {
+export default function UserSidebar({ activeTab, setActiveTab, collapsed = false, onToggle }) {
     const [hoveredMenu, setHoveredMenu] = useState(null);
 
     // List menu disesuaikan untuk kebutuhan Pengguna Kampus
-    const menuItems = [
+    const MENU_ITEMS = [
         {
             id: 'dashboard',
             name: 'Dashboard Portal',
@@ -39,20 +45,10 @@ export default function UserSidebar({ activeTab, setActiveTab }) {
                     <circle cx="12" cy="12" r="9" />
                 </svg>
             )
-        },
-        {
-            id: 'riwayat',
-            name: 'Riwayat Selesai',
-            icon: (color) => (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-                    <polyline points="22 4 12 14.01 9 11.01" />
-                </svg>
-            )
         }
     ];
 
-    const colors = {
+    const COLORS = {
         bgSidebar: '#111827',
         bgActive: '#1F2937',
         textActive: '#FBBF24',
@@ -62,59 +58,95 @@ export default function UserSidebar({ activeTab, setActiveTab }) {
 
     return (
         <aside style={{
-            width: '270px',
-            minWidth: '270px',
-            backgroundColor: colors.bgSidebar,
+            width: collapsed ? '4.75rem' : '16.875rem',
+            minWidth: collapsed ? '4.75rem' : '16.875rem',
+            flexShrink: 0,
+            overflow: 'hidden',
+            transition: 'width 0.25s ease, min-width 0.25s ease',
+            backgroundColor: COLORS.bgSidebar,
             color: '#FFFFFF',
-            padding: '24px 16px',
+            padding: collapsed ? '1.5rem 0.625rem' : '1.5rem 1rem',
             height: '100vh',
             boxSizing: 'border-box',
             fontFamily: 'system-ui, -apple-system, sans-serif',
-            boxShadow: '4px 0px 10px rgba(0,0,0,0.3)'
+            boxShadow: '0.25rem 0rem 0.625rem rgba(0,0,0,0.3)'
         }}>
             {/* Header Panel */}
-            <div style={{ marginBottom: '32px', paddingLeft: '8px', borderBottom: '1px solid #374151', paddingBottom: '16px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={colors.textActive} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ position: 'relative', marginBottom: '2rem', paddingLeft: collapsed ? '0' : '0.5rem', borderBottom: '0.0625rem solid #374151', paddingBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: collapsed ? 'center' : 'flex-start', gap: '0.625rem', marginBottom: collapsed ? '0' : '0.375rem' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={COLORS.textActive} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
                         <path d="M6 12v5c0 2 2.5 3 6 3s6-1 6-3v-5" />
                     </svg>
-                    <h2 style={{ fontSize: '19px', fontWeight: '800', margin: 0, color: '#FFFFFF', letterSpacing: '0.5px' }}>
-                        Lost & Found
-                    </h2>
+                    {!collapsed && (
+                        <h2 style={{ fontSize: '1.1875rem', fontWeight: '800', margin: 0, color: '#FFFFFF', letterSpacing: '0.0312rem' }}>
+                            Lost & Found
+                        </h2>
+                    )}
                 </div>
-                <p style={{
-                    fontSize: '11px',
-                    color: colors.textActive,
-                    fontWeight: '700',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1.5px',
-                    margin: 0,
-                    paddingLeft: '34px'
-                }}>
-                    PORTAL PENGGUNA KAMPUS
-                </p>
+                {!collapsed && (
+                    <p style={{
+                        fontSize: '0.6875rem',
+                        color: COLORS.textActive,
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.0938rem',
+                        margin: 0,
+                        paddingLeft: '2.125rem'
+                    }}>
+                        PORTAL PENGGUNA KAMPUS
+                    </p>
+                )}
+                {/* Tombol buka/tutup sidebar */}
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    aria-label={collapsed ? 'Buka sidebar' : 'Tutup sidebar'}
+                    title={collapsed ? 'Buka sidebar' : 'Tutup sidebar'}
+                    style={{
+                        position: collapsed ? 'static' : 'absolute',
+                        top: 0,
+                        right: 0,
+                        width: '1.75rem',
+                        height: '1.75rem',
+                        margin: collapsed ? '0.875rem auto 0' : 0,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        border: '0.0625rem solid #374151',
+                        borderRadius: '0.375rem',
+                        background: 'transparent',
+                        cursor: 'pointer'
+                    }}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E2E8F0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points={collapsed ? '9 18 15 12 9 6' : '15 18 9 12 15 6'} />
+                    </svg>
+                </button>
             </div>
 
             {/* Navigasi Menu */}
-            <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {menuItems.map((item) => {
+            <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {MENU_ITEMS.map((item) => {
                     // Menggunakan activeTab dari props parent
                     const isActive = activeTab === item.id;
                     const isHovered = hoveredMenu === item.id;
-                    const currentIconColor = isActive ? colors.textActive : (isHovered ? '#FFFFFF' : colors.textNormal);
+                    const currentIconColor = isActive ? COLORS.textActive : (isHovered ? '#FFFFFF' : COLORS.textNormal);
 
                     return (
                         <button
                             key={item.id}
+                            title={collapsed ? item.name : undefined}
+                            aria-label={item.name}
                             onClick={() => setActiveTab(item.id)} // Mengubah state di parent
                             onMouseEnter={() => setHoveredMenu(item.id)}
                             onMouseLeave={() => setHoveredMenu(null)}
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
-                                fontSize: '15px',
+                                justifyContent: collapsed ? 'center' : 'flex-start',
+                                gap: collapsed ? '0' : '0.75rem',
+                                fontSize: '0.9375rem',
                                 fontWeight: isActive ? '700' : '600',
                                 color: currentIconColor,
                                 background: 'none',
@@ -122,16 +154,16 @@ export default function UserSidebar({ activeTab, setActiveTab }) {
                                 width: '100%',
                                 textAlign: 'left',
                                 cursor: 'pointer',
-                                padding: '14px 16px',
-                                borderRadius: '8px',
-                                backgroundColor: isActive ? colors.bgActive : (isHovered ? '#1F2937' : 'transparent'),
-                                borderLeft: isActive ? `5px solid ${colors.accentLine}` : '5px solid transparent',
+                                padding: collapsed ? '0.875rem 0' : '0.875rem 1rem',
+                                borderRadius: '0.5rem',
+                                backgroundColor: isActive ? COLORS.bgActive : (isHovered ? '#1F2937' : 'transparent'),
+                                borderLeft: isActive ? `0.3125rem solid ${COLORS.accentLine}` : '0.3125rem solid transparent',
                                 transition: 'all 0.15s ease-in-out',
-                                paddingLeft: isActive ? '11px' : '16px'
+                                paddingLeft: collapsed ? '0' : (isActive ? '0.6875rem' : '1rem')
                             }}
                         >
                             {item.icon(currentIconColor)}
-                            <span>{item.name}</span>
+                            {!collapsed && <span style={{ whiteSpace: 'nowrap' }}>{item.name}</span>}
                         </button>
                     );
                 })}
